@@ -47,6 +47,13 @@
                         {{ __('Productos') }}
                     </x-nav-link>
                 </div>
+
+                <!-- Enlace a Consultas -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('consultas.form')" :active="request()->routeIs('consultas.form')">
+                        {{ __('Consultas') }}
+                    </x-nav-link>
+                </div>
             </div>
 
             <!-- Menú de Configuración -->
@@ -135,6 +142,13 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('productos')" :active="request()->routeIs('productos')">
                 {{ __('Productos') }}
+            </x-responsive-nav-link>
+        </div>
+
+        <!-- Enlace a Consultas (versión responsiva) -->
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('consultas.form')" :active="request()->routeIs('consultas.form')">
+                {{ __('Consultas') }}
             </x-responsive-nav-link>
         </div>
 

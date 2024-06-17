@@ -17,6 +17,11 @@ class SecretariaController extends Controller
         return view('/UsuarioSecretaria');
     }
 
+    public function consultasForm()
+    {
+        // Lógica para manejar la vista del formulario de consultas
+        return view('opciones.consultas.consultasform');
+    }
 // ********* PACIENTES
     // Guardar un nuevo paciente
     public function storePacientes(Request $request)
@@ -199,7 +204,22 @@ class SecretariaController extends Controller
 
         return redirect()->route('citas')->with('status', 'Cita eliminada correctamente');
     }
+// calendar
+    public function getCitasEventos()
+    {
+        $citas = Citas::with('paciente')->where('activo', 'si')->get();
+        $eventos = [];
 
+        foreach ($citas as $cita) {
+            $eventos[] = [
+                'title' => $cita->paciente->nombres . ' ' . $cita->paciente->apepat,
+                'start' => $cita->fecha . 'T' . $cita->hora,
+                'paciente' => $cita->paciente->nombres . ' ' . $cita->paciente->apepat . ' ' . $cita->paciente->apemat,
+            ];
+        }
+
+        return response()->json($eventos);
+    }
 // ********* MEDICOS
     // Mostrar todos los médicos activos
     public function mostrarMedicos()

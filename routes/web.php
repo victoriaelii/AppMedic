@@ -57,6 +57,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/opciones/servicios/editar/{id}', [SecretariaController::class, 'editarServicio'])->name('servicios.editar');
     Route::patch('/opciones/servicios/editar/{id}', [SecretariaController::class, 'updateServicio'])->name('servicios.update');
     Route::delete('/opciones/servicios/eliminar/{id}', [SecretariaController::class, 'eliminarServicio'])->name('servicios.eliminar');
+
+    // CONSULTAS
+    Route::get('/opciones/consultas', [SecretariaController::class, 'consultasForm'])->name('consultas.form');
+
+
 });
 
 // Incluir las rutas de autenticación
