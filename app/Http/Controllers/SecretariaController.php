@@ -224,9 +224,12 @@ class SecretariaController extends Controller
     // Mostrar todos los médicos activos
     public function mostrarMedicos()
     {
-        $medicos = User::where('rol', 'medico')->where('activo', 'si')->get();
+        $medicos = User::whereIn('rol', ['medico', 'secretaria', 'colaborador'])
+                        ->where('activo', 'si')
+                        ->get();
         return view('/opciones.medicos.medicos', compact('medicos'));
     }
+    
 
     // Guardar un nuevo médico
     public function storeMedicos(Request $request)
@@ -237,6 +240,7 @@ class SecretariaController extends Controller
             'apemat' => 'required|string|max:255',
             'fechanac' => 'required|date',
             'telefono' => 'required|string|max:20',
+            'rol' => ['required', 'in:medico,secretaria,colaborador'],
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -249,7 +253,7 @@ class SecretariaController extends Controller
             'telefono' => $request->telefono,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'rol' => 'medico',
+            'rol' => $request->rol,
         ]);
 
         return redirect()->route('medicos')->with('status', 'Médico registrado correctamente');

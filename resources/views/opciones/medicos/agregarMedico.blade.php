@@ -42,9 +42,11 @@
 
                 <!-- Rol Medico -->
                 <div class="mt-4 col-span-2">
-                    <x-input-label for="rol" :value="__('Rol')" />
-                    <x-text-input id="rol_display" class="block mt-1 w-full" type="text" value="Médico" disabled />
-                    <x-text-input id="rol" class="block mt-1 w-full" type="hidden" name="rol" value="medico" />
+                    <select id="rol" name="rol" class="block mt-1 w-full" required>
+                        <option value="medico" {{ old('rol') == 'medico' ? 'selected' : '' }}>Médico</option>
+                        <option value="secretaria" {{ old('rol') == 'secretaria' ? 'selected' : '' }}>Secretaria</option>
+                        <option value="colaborador" {{ old('rol') == 'colaborador' ? 'selected' : '' }}>Colaborador</option>
+                    </select>
                     <x-input-error :messages="$errors->get('rol')" class="mt-2" />
                 </div>
 
@@ -73,7 +75,7 @@
             <!-- Botón para registrar el médico -->
             <div class="flex items-center justify-end mt-4">
                 <x-primary-button class="ml-4">
-                    {{ __('Registrar Médico') }}
+                    {{ __('Registrar Usuario') }}
                 </x-primary-button>
             </div>
         </form>

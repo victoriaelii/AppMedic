@@ -10,11 +10,11 @@
                     <div class="overflow-x-auto">
                         <!-- Encabezado de la sección -->
                         <div class="flex my-4 items-center justify-between">
-                            <h1 class="text-2xl font-semibold text-gray-800 uppercase">Médicos</h1>
+                            <h1 class="text-2xl font-semibold text-gray-800 uppercase">Usuarios</h1>
                             <!-- Botón para agregar nuevo médico -->
                             <a href="{{ route('medicos.agregar') }}">
                                 <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-                                    {{ __('Agregar Médico') }}
+                                    {{ __('Agregar Usuario') }}
                                 </button>
                             </a>
                         </div>
@@ -28,6 +28,7 @@
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Apellido Materno</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Correo</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Teléfono</th>
+                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Rol</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Acciones</th>
                                 </tr>
                             </thead>
@@ -41,6 +42,7 @@
                                         <td class="px-6 py-4 text-left">{{ $medico->apemat }}</td>
                                         <td class="px-6 py-4 text-left">{{ $medico->email }}</td>
                                         <td class="px-6 py-4 text-left">{{ $medico->telefono }}</td>
+                                        <td class="px-6 py-4 text-left">{{ $medico->rol }}</td>
                                         <td class="px-6 py-4 text-left flex items-center space-x-2">
                                             <!-- Enlace para editar el médico -->
                                             <a href="{{ route('medicos.editar', $medico->id) }}" class="text-blue-600 hover:text-blue-900 transition">Editar</a>
@@ -57,7 +59,7 @@
                         </table>
                         <!-- Mensaje si no hay médicos registrados -->
                         @if($medicos->isEmpty())
-                            <p class="text-center text-gray-500 mt-4">No hay médicos registrados.</p>
+                            <p class="text-center text-gray-500 mt-4">No hay usuarios registrados.</p>
                         @endif
                     </div>
                 </div>
