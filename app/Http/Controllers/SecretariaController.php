@@ -34,11 +34,13 @@ class SecretariaController extends Controller
             'correo' => 'required|string|email|max:255|unique:pacientes,correo',
             'telefono' => 'required|string|max:20',
         ]);
-
+    
         Paciente::create($request->all());
-
-        return redirect()->route('dashboardOpciones')->with('status', 'Paciente registrado correctamente');
+    
+        $redirect_to = $request->input('redirect_to', 'dashboardOpciones');
+        return redirect()->route($redirect_to)->with('status', 'Paciente registrado correctamente');
     }
+    
 
     // Mostrar todos los pacientes activos
     public function mostrarPacientes()
@@ -139,13 +141,16 @@ class SecretariaController extends Controller
     }
 
 // ********* CITAS
-    // Mostrar todas las citas activas
     public function mostrarCitas()
     {
-        $citas = Citas::where('activo', 'si')->get();
-        return view('opciones.citas.citas', compact('citas'));
-    }
+        $citas = Citas::select('citas.*', 'pacientes.nombres', 'pacientes.apepat', 'pacientes.apemat')
+                        ->join('pacientes', 'citas.pacienteid', '=', 'pacientes.id')
+                        ->where('citas.activo', 'si')
+                        ->get();
 
+        return view('/opciones.citas.citas', compact('citas'));
+    }
+///////////////////////////////////////////////////////////// lede
     // Guardar una nueva cita
     public function storeCitas(Request $request)
     {
@@ -153,24 +158,30 @@ class SecretariaController extends Controller
             'fecha' => 'required|date',
             'hora' => ['required', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/'],
             'pacienteid' => 'required|exists:pacientes,id',
+            'medicoid' => 'required|exists:users,id',
         ]);
-
+    
         Citas::create([
             'fecha' => $request->fecha,
             'hora' => $request->hora,
             'pacienteid' => $request->pacienteid,
+            'medicoid' => $request->medicoid,
             'activo' => 'si',
         ]);
-
+    
         return redirect()->route('citas')->with('status', 'Cita registrada correctamente');
     }
+    
 
     // Mostrar formulario para agregar una cita
     public function crearCita()
     {
         $pacientes = Paciente::where('activo', 'si')->get();
-        return view('opciones.citas.agregarCita', compact('pacientes'));
+        $medicos = User::where('rol', 'medico')->where('activo', 'si')->get();
+        return view('opciones.citas.agregarCita', compact('pacientes', 'medicos'));
     }
+    
+
 
     // Mostrar formulario para editar una cita
     public function editarCita($id)

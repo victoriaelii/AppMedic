@@ -19,6 +19,7 @@ return new class extends Migration
             $table->time('hora'); // Columna para la hora de la cita.
             $table->enum('activo', ['si', 'no'])->default('si'); // Columna para el estado (activo o inactivo) de la cita, por defecto es 'si'.
             $table->foreignId('pacienteid')->constrained('pacientes')->onDelete('cascade'); // Columna para el ID del paciente, con restricción de eliminación en cascada.
+            $table->foreignId('medicoid')->constrained('users')->onDelete('cascade'); // Columna para el ID del médico, con restricción de eliminación en cascada.
             $table->timestamps(); // Columnas para las marcas de tiempo (creación y actualización).
         });
     }

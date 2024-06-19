@@ -32,6 +32,20 @@
                     </select>
                     <x-input-error :messages="$errors->get('pacienteid')" class="mt-2" />
                 </div>
+
+                <!-- Selección de médico -->
+                <div class="mt-4 col-span-2">
+                    <x-input-label for="medicoid" :value="__('Médico')" />
+                    <select id="medicoid" name="medicoid" class="block mt-1 w-full" required>
+                        <!-- Iterar sobre los médicos para crear las opciones del menú desplegable -->
+                        @foreach($medicos as $medico)
+                            <option value="{{ $medico->id }}" {{ old('medicoid') == $medico->id ? 'selected' : '' }}>
+                                {{ $medico->nombres }} {{ $medico->apepat }} {{ $medico->apemat }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('medicoid')" class="mt-2" />
+                </div>
             </div>
 
             <!-- Botón para registrar la cita -->
@@ -39,7 +53,14 @@
                 <x-primary-button class="ml-4">
                     {{ __('Registrar Cita') }}
                 </x-primary-button>
+
             </div>
         </form>
+        <a href="{{ route('agregarPaciente', ['redirect_to' => 'crearCita']) }}">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                {{ __('Registrar Paciente') }}
+            </button>
+        </a>
+        
     </x-guest-layout>
 </x-app-layout>

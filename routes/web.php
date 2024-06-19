@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rutas para la gestión de pacientes
-    Route::post('/pacientes/agregarPaciente', [SecretariaController::class, 'storePacientes'])->name('registrarPaciente.store');
+    Route::post('/pacientes/store', [SecretariaController::class, 'storePacientes'])->name('pacientes.store');
     Route::get('/agregarPaciente', function () {
         return view('opciones.pacientes.agregarPaciente');
     })->name('agregarPaciente');
@@ -28,7 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para la gestión de productos
     Route::get('/opciones/productos/agregar', [SecretariaController::class, 'crearProducto'])->name('productos.agregar');
-    Route::post('/opciones/productos/agregarProducto', [SecretariaController::class, 'storeProductos'])->name('productos.store');
+    Route::post('/opciones/productos/store', [SecretariaController::class, 'storeProductos'])->name('productos.store');
     Route::get('/opciones/productos/editar/{id}', [SecretariaController::class, 'editarProducto'])->name('productos.editar');
     Route::patch('/opciones/productos/editar/{id}', [SecretariaController::class, 'updateProducto'])->name('productos.update');
     Route::delete('/opciones/productos/eliminar/{id}', [SecretariaController::class, 'eliminarProducto'])->name('productos.eliminar');
@@ -36,15 +36,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para la gestión de citas
     Route::get('/opciones/citas', [SecretariaController::class, 'mostrarCitas'])->name('citas');
-    Route::post('/opciones/citas/agregarCita', [SecretariaController::class, 'storeCitas'])->name('citas.store');
+    Route::post('/opciones/citas/store', [SecretariaController::class, 'storeCitas'])->name('citas.store');
     Route::get('/opciones/citas/agregar', [SecretariaController::class, 'crearCita'])->name('citas.agregar');
     Route::get('/opciones/citas/editar/{id}', [SecretariaController::class, 'editarCita'])->name('citas.editar');
     Route::patch('/opciones/citas/editar/{id}', [SecretariaController::class, 'updateCita'])->name('citas.update');
     Route::delete('/opciones/citas/eliminar/{id}', [SecretariaController::class, 'eliminarCita'])->name('citas.eliminar');
+    Route::get('/opciones/citas/agregar', [SecretariaController::class, 'crearCita'])->name('crearCita');
 
     // Rutas para la gestión de médicos
     Route::get('/opciones/medicos', [SecretariaController::class, 'mostrarMedicos'])->name('medicos');
-    Route::post('/opciones/medicos/agregarMedico', [SecretariaController::class, 'storeMedicos'])->name('medicos.store');
+    Route::post('/opciones/medicos/store', [SecretariaController::class, 'storeMedicos'])->name('medicos.store');
     Route::get('/opciones/medicos/agregar', [SecretariaController::class, 'crearMedico'])->name('medicos.agregar');
     Route::get('/opciones/medicos/editar/{id}', [SecretariaController::class, 'editarMedico'])->name('medicos.editar');
     Route::patch('/opciones/medicos/editar/{id}', [SecretariaController::class, 'updateMedico'])->name('medicos.update');
@@ -52,7 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para la gestión de servicios
     Route::get('/opciones/servicios', [SecretariaController::class, 'mostrarServicios'])->name('servicios');
-    Route::post('/opciones/servicios/agregarServicio', [SecretariaController::class, 'storeServicios'])->name('servicios.store');
+    Route::post('/opciones/servicios/store', [SecretariaController::class, 'storeServicios'])->name('servicios.store');
     Route::get('/opciones/servicios/agregar', [SecretariaController::class, 'crearServicio'])->name('servicios.agregar');
     Route::get('/opciones/servicios/editar/{id}', [SecretariaController::class, 'editarServicio'])->name('servicios.editar');
     Route::patch('/opciones/servicios/editar/{id}', [SecretariaController::class, 'updateServicio'])->name('servicios.update');
@@ -60,8 +61,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // CONSULTAS
     Route::get('/opciones/consultas', [SecretariaController::class, 'consultasForm'])->name('consultas.form');
-
-
 });
 
 // Incluir las rutas de autenticación

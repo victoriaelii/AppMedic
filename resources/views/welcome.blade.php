@@ -28,26 +28,19 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
 
-        /* Estilo del botón primario */
-        .btn-primary {
-            background-color: #2563eb;
+        /* Estilo de los botones */
+        .btn-custom {
+            margin-top: 20px;
             color: white;
-            transition: background-color 0.3s ease;
+            border: 1px solid white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-
-        /* Estilo del botón secundario */
-        .btn-secondary {
-            background-color: #10b981;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background-color: #059669;
+        .btn-custom:hover {
+            color: black;
+            background-color: white;
         }
     </style>
 </head>
@@ -65,20 +58,14 @@
             @if (Route::has('login'))
                 @auth
                     <!-- Enlace al dashboard si el usuario está autenticado -->
-                    <a href="{{ url('/dashboard') }}" class="btn-primary px-4 py-2 rounded-md transition">
+                    <a href="{{ url('/dashboard') }}" class="btn-custom">
                         Dashboard
                     </a>
                 @else
                     <!-- Enlace para iniciar sesión si el usuario no está autenticado -->
-                    <a href="{{ route('login') }}" class="btn-primary px-4 py-2 rounded-md transition">
+                    <a href="{{ route('login') }}" class="btn-custom">
                         Iniciar sesión
                     </a>
-                    @if (Route::has('register'))
-                        <!-- Enlace para registrarse si el usuario no está autenticado -->
-                        <a href="{{ route('register') }}" class="btn-secondary px-4 py-2 rounded-md transition">
-                            Registrarse
-                        </a>
-                    @endif
                 @endauth
             @endif
         </div>

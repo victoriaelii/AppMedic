@@ -12,11 +12,12 @@
                         <div class="flex my-4 items-center justify-between">
                             <h1 class="text-2xl font-semibold text-gray-800 uppercase">Pacientes</h1>
                             <!-- Botón para registrar nuevo paciente -->
-                            <a href="{{ route('agregarPaciente') }}">
+                            <a href="{{ route('agregarPaciente', ['redirect_to' => 'dashboardOpciones']) }}">
                                 <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
                                     {{ __('Registrar Paciente') }}
                                 </button>
                             </a>
+                            
                         </div>
                         <!-- Tabla de pacientes -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);">
