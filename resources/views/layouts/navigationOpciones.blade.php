@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false, openCitas: false }" class="bg-white border-b border-gray-100">
     <!-- Menú de Navegación Principal -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -27,11 +27,22 @@
                     </x-nav-link>
                 </div>
 
-                <!-- Enlace a Citas -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('citas')" :active="request()->routeIs('citas')">
+                <!-- Enlace a Citas con Submenú -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex relative">
+                    <x-nav-link href="#" @click="openCitas = !openCitas" class="flex items-center">
                         {{ __('Citas') }}
+                        <svg class="ml-1 h-4 w-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
                     </x-nav-link>
+
+                    <!-- Submenú para Citas -->
+                    <div x-show="openCitas" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10" style="top: 100%;">
+                        <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                            <a href="{{ route('citas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Citas') }}</a>
+                            <a href="{{ route('tablaCitas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Tabla Citas') }}</a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Enlace a Servicios -->
@@ -50,7 +61,7 @@
 
                 <!-- Enlace a Consultas -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('consultas.form')" :active="request()->routeIs('consultas.form')">
+                    <x-nav-link :href="route('consultas.porConsultar')" :active="request()->routeIs('consultas.porConsultar')">
                         {{ __('Consultas') }}
                     </x-nav-link>
                 </div>
@@ -129,6 +140,9 @@
             <x-responsive-nav-link :href="route('citas')" :active="request()->routeIs('citas')">
                 {{ __('Citas') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('tablaCitas')" :active="request()->routeIs('tablaCitas')">
+                {{ __('Tabla Citas') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Enlace a Servicios (versión responsiva) -->
@@ -147,7 +161,7 @@
 
         <!-- Enlace a Consultas (versión responsiva) -->
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('consultas.form')" :active="request()->routeIs('consultas.form')">
+            <x-responsive-nav-link :href="route('consultas.porConsultar')" :active="request()->routeIs('consultas.porConsultar')">
                 {{ __('Consultas') }}
             </x-responsive-nav-link>
         </div>

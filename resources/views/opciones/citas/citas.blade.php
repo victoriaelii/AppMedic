@@ -129,9 +129,11 @@
         let calendarGrid = '';
         
         // Days of the previous month
-        for (let i = firstDayOfMonth.getDay(); i > 0; i--) {
+        const daysInWeek = 7;
+        const firstDayIndex = (firstDayOfMonth.getDay() + 6) % daysInWeek; // Adjusting Sunday as the first day
+        for (let i = 0; i < firstDayIndex; i++) {
             const prevMonthDay = new Date(firstDayOfMonth);
-            prevMonthDay.setDate(prevMonthDay.getDate() - i);
+            prevMonthDay.setDate(prevMonthDay.getDate() - (firstDayIndex - i));
             calendarGrid += `<div class="relative bg-gray-50 px-3 py-2 text-gray-500">
                                 <time datetime="${prevMonthDay.toISOString().split('T')[0]}">${prevMonthDay.getDate()}</time>
                              </div>`;
@@ -157,7 +159,7 @@
         }
         
         // Days of the next month
-        const daysInNextMonth = 42 - (firstDayOfMonth.getDay() + lastDayOfMonth.getDate());
+        const daysInNextMonth = daysInWeek * 6 - (firstDayIndex + lastDayOfMonth.getDate());
         for (let i = 1; i <= daysInNextMonth; i++) {
             const nextMonthDay = new Date(lastDayOfMonth);
             nextMonthDay.setDate(nextMonthDay.getDate() + i);

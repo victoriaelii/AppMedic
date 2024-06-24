@@ -18,6 +18,13 @@
                                 </button>
                             </a>
                         </div>
+                        <!-- Mostrar mensaje de error si existe -->
+                        @if ($errors->any())
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                <strong class="font-bold">Error:</strong>
+                                <span class="block sm:inline">{{ $errors->first('error') }}</span>
+                            </div>
+                        @endif
                         <!-- Tabla de médicos -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);">
                             <!-- Cabecera de la tabla -->
@@ -26,6 +33,7 @@
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Nombres</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Apellido Paterno</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Apellido Materno</th>
+                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Fecha de Nacimiento</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Correo</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Teléfono</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Rol</th>
@@ -40,6 +48,7 @@
                                         <td class="px-6 py-4 text-left">{{ $medico->nombres }}</td>
                                         <td class="px-6 py-4 text-left">{{ $medico->apepat }}</td>
                                         <td class="px-6 py-4 text-left">{{ $medico->apemat }}</td>
+                                        <td class="px-6 py-4 text-left">{{ $medico->fechanac }}</td>
                                         <td class="px-6 py-4 text-left">{{ $medico->email }}</td>
                                         <td class="px-6 py-4 text-left">{{ $medico->telefono }}</td>
                                         <td class="px-6 py-4 text-left">{{ $medico->rol }}</td>

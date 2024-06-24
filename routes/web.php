@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/opciones/citas/editar/{id}', [SecretariaController::class, 'updateCita'])->name('citas.update');
     Route::delete('/opciones/citas/eliminar/{id}', [SecretariaController::class, 'eliminarCita'])->name('citas.eliminar');
     Route::get('/opciones/citas/agregar', [SecretariaController::class, 'crearCita'])->name('crearCita');
+    Route::get('/opciones/citas/tablaCitas', [SecretariaController::class, 'tablaCitas'])->name('tablaCitas');
 
     // Rutas para la gestión de médicos
     Route::get('/opciones/medicos', [SecretariaController::class, 'mostrarMedicos'])->name('medicos');
@@ -60,7 +61,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/opciones/servicios/eliminar/{id}', [SecretariaController::class, 'eliminarServicio'])->name('servicios.eliminar');
 
     // CONSULTAS
-    Route::get('/opciones/consultas', [SecretariaController::class, 'consultasForm'])->name('consultas.form');
+    Route::get('/opciones/consultas', [SecretariaController::class, 'porConsultar'])->name('consultas.porConsultar');
+    Route::get('/consultasform/{id}', [SecretariaController::class, 'showForm'])->name('consultasform');
 });
 
 // Incluir las rutas de autenticación

@@ -22,7 +22,21 @@ class SecretariaController extends Controller
         // Lógica para manejar la vista del formulario de consultas
         return view('opciones.consultas.consultasform');
     }
-// ********* PACIENTES
+
+    public function porConsultar()
+    {
+        $citas = Citas::with(['paciente', 'medico'])->paginate(10); // Ejemplo de cómo obtener citas con paginación y relaciones
+        return view('opciones.consultas.porConsultar', compact('citas'));
+    }
+
+    public function showForm($id)
+    {
+        $cita = Citas::findOrFail($id);
+        // Añade la lógica que necesites para mostrar el formulario de consulta
+        return view('opciones.consultas.consultasform', compact('cita'));
+    }
+
+    // ********* PACIENTES
     // Guardar un nuevo paciente
     public function storePacientes(Request $request)
     {
@@ -34,13 +48,12 @@ class SecretariaController extends Controller
             'correo' => 'required|string|email|max:255|unique:pacientes,correo',
             'telefono' => 'required|string|max:20',
         ]);
-    
+
         Paciente::create($request->all());
-    
+
         $redirect_to = $request->input('redirect_to', 'dashboardOpciones');
         return redirect()->route($redirect_to)->with('status', 'Paciente registrado correctamente');
     }
-    
 
     // Mostrar todos los pacientes activos
     public function mostrarPacientes()
@@ -83,7 +96,7 @@ class SecretariaController extends Controller
         return redirect()->route('dashboardOpciones')->with('status', 'Paciente eliminado correctamente');
     }
 
-// ********* PRODUCTOS
+    // ********* PRODUCTOS
     // Mostrar todos los productos activos
     public function mostrarProductos()
     {
@@ -140,7 +153,29 @@ class SecretariaController extends Controller
         return redirect()->route('productos')->with('status', 'Producto eliminado correctamente');
     }
 
-// ********* CITAS
+    // ********* CITAS
+    public function tablaCitas(Request $request)
+    {
+        $query = Citas::with(['paciente', 'medico']);
+
+        if ($request->filled('nombre')) {
+            $nombre = $request->input('nombre');
+            $query->whereHas('paciente', function ($query) use ($nombre) {
+                $query->where('nombres', 'like', "%{$nombre}%")
+                      ->orWhere('apepat', 'like', "%{$nombre}%")
+                      ->orWhere('apemat', 'like', "%{$nombre}%");
+            });
+        }
+
+        if ($request->filled('fecha')) {
+            $fecha = $request->input('fecha');
+            $query->whereDate('fecha', $fecha);
+        }
+
+        $citas = $query->paginate(10);
+        return view('opciones.citas.tablaCitas', compact('citas'));
+    }
+
     public function mostrarCitas()
     {
         $citas = Citas::select('citas.*', 'pacientes.nombres', 'pacientes.apepat', 'pacientes.apemat')
@@ -150,7 +185,7 @@ class SecretariaController extends Controller
 
         return view('/opciones.citas.citas', compact('citas'));
     }
-///////////////////////////////////////////////////////////// lede
+
     // Guardar una nueva cita
     public function storeCitas(Request $request)
     {
@@ -160,7 +195,7 @@ class SecretariaController extends Controller
             'pacienteid' => 'required|exists:pacientes,id',
             'medicoid' => 'required|exists:users,id',
         ]);
-    
+
         Citas::create([
             'fecha' => $request->fecha,
             'hora' => $request->hora,
@@ -168,10 +203,9 @@ class SecretariaController extends Controller
             'medicoid' => $request->medicoid,
             'activo' => 'si',
         ]);
-    
+
         return redirect()->route('citas')->with('status', 'Cita registrada correctamente');
     }
-    
 
     // Mostrar formulario para agregar una cita
     public function crearCita()
@@ -180,8 +214,6 @@ class SecretariaController extends Controller
         $medicos = User::where('rol', 'medico')->where('activo', 'si')->get();
         return view('opciones.citas.agregarCita', compact('pacientes', 'medicos'));
     }
-    
-
 
     // Mostrar formulario para editar una cita
     public function editarCita($id)
@@ -211,11 +243,12 @@ class SecretariaController extends Controller
     public function eliminarCita($id)
     {
         $cita = Citas::findOrFail($id);
-        $cita->update(['activo' => 'no']);
+        $cita->delete();
 
-        return redirect()->route('citas')->with('status', 'Cita eliminada correctamente');
+        return redirect()->route('tablaCitas')->with('status', 'Cita eliminada correctamente');
     }
-// calendar
+
+    // calendar
     public function getCitasEventos()
     {
         $citas = Citas::with('paciente')->where('activo', 'si')->get();
@@ -231,7 +264,8 @@ class SecretariaController extends Controller
 
         return response()->json($eventos);
     }
-// ********* MEDICOS
+
+    // ********* MEDICOS
     // Mostrar todos los médicos activos
     public function mostrarMedicos()
     {
@@ -240,7 +274,6 @@ class SecretariaController extends Controller
                         ->get();
         return view('/opciones.medicos.medicos', compact('medicos'));
     }
-    
 
     // Guardar un nuevo médico
     public function storeMedicos(Request $request)
@@ -251,10 +284,15 @@ class SecretariaController extends Controller
             'apemat' => 'required|string|max:255',
             'fechanac' => 'required|date',
             'telefono' => 'required|string|max:20',
-            'rol' => ['required', 'in:medico,secretaria,colaborador'],
+            'rol' => ['required', 'in:medico,secretaria,colaborador,admin'],
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
+        // Verificar si ya existe un médico registrado
+        if ($request->rol === 'medico' && User::where('rol', 'medico')->exists()) {
+            return redirect()->back()->withInput()->with('error', 'No se pueden registrar más de un doctor');
+        }
 
         User::create([
             'nombres' => $request->nombres,
@@ -319,7 +357,7 @@ class SecretariaController extends Controller
         return redirect()->route('medicos')->with('status', 'Médico eliminado correctamente');
     }
 
-// ********* SERVICIOS
+    // ********* SERVICIOS
     // Mostrar todos los servicios activos
     public function mostrarServicios()
     {

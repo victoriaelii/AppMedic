@@ -27,6 +27,7 @@
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Nombres</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Apellido Paterno</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Apellido Materno</th>
+                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Fecha de Nacimiento</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Correo</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Teléfono</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Acciones</th>
@@ -40,6 +41,7 @@
                                         <td class="px-6 py-4 text-left">{{ $paciente->nombres }}</td>
                                         <td class="px-6 py-4 text-left">{{ $paciente->apepat }}</td>
                                         <td class="px-6 py-4 text-left">{{ $paciente->apemat }}</td>
+                                        <td class="px-6 py-4 text-left">{{ $paciente->fechanac }}</td>
                                         <td class="px-6 py-4 text-left">{{ $paciente->correo }}</td>
                                         <td class="px-6 py-4 text-left">{{ $paciente->telefono }}</td>
                                         <td class="px-6 py-4 text-left flex items-center space-x-2">

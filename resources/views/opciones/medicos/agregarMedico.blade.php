@@ -1,7 +1,10 @@
 <x-app-layout>
     <x-guest-layout>
+        <!-- SweetAlert2 CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.min.css">
+
         <!-- Formulario para registrar un nuevo médico -->
-        <form method="POST" action="{{ route('medicos.store') }}">
+        <form id="register-form" method="POST" action="{{ route('medicos.store') }}">
             @csrf
 
             <!-- Nombres -->
@@ -79,5 +82,41 @@
                 </x-primary-button>
             </div>
         </form>
+
+        <!-- SweetAlert2 JavaScript -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.getElementById('register-form').addEventListener('submit', function(event) {
+                var birthDate = new Date(document.getElementById('fechanac').value);
+                var today = new Date();
+                var age = today.getFullYear() - birthDate.getFullYear();
+                var m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                if (age < 18) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Debes tener al menos 18 años para registrarte.',
+                    });
+                }
+            });
+        </script>
+
+        @if (session('error'))
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '{{ session('error') }}',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('medicos') }}";
+                    }
+                });
+            </script>
+        @endif
     </x-guest-layout>
 </x-app-layout>

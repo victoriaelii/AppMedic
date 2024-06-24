@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('apemat', 100); // Columna para el apellido materno.
             $table->date('fechanac'); // Columna para la fecha de nacimiento.
             $table->string('telefono', 20); // Columna para el teléfono.
-            $table->enum('rol', ['medico', 'secretaria', 'colaborador']); // Columna para el rol del usuario.
+            $table->enum('rol', ['medico', 'secretaria', 'colaborador', 'admin']); // Columna para el rol del usuario.
             $table->enum('activo', ['si', 'no'])->default('si'); // Columna para el estado (activo o inactivo) del usuario, por defecto es 'si'.
             $table->string('email')->unique(); // Columna para el correo electrónico, que debe ser único.
             $table->string('password'); // Columna para la contraseña.
