@@ -42,7 +42,7 @@
                             </thead>
                             <!-- Cuerpo de la tabla -->
                             <tbody class="bg-white" style="background-color: rgba(255, 255, 255, 0.6);">
-                                <!-- Iterar sobre las citas y mostrar cada una en una fila -->
+                                <!-- mostrar cada una en una fila -->
                                 @foreach($citas as $cita)
                                     <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
                                         <td class="px-6 py-4 text-left">{{ $cita->fecha }}</td>

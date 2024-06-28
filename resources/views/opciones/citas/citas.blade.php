@@ -4,7 +4,6 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto bg-white dark:bg-neutral-700">
-                        <!-- Calendar -->
                         <div class="lg:flex lg:h-full lg:flex-col">
                             <header class="flex items-center justify-between border-b border-gray-200 px-6 py-4 lg:flex-none">
                                 <h1 class="text-base font-semibold leading-6 text-gray-900">
@@ -66,12 +65,10 @@
                                 </div>
                                 <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 lg:flex-auto">
                                     <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-6 lg:gap-px" id="calendar-grid">
-                                        <!-- Placeholder for dynamically generated days -->
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Quitar mensaje de no hay citas registradas -->
                     </div>
                 </div>
             </div>
@@ -81,20 +78,21 @@
 
 <style>
     .calendar-day {
-        max-height: 100px; /* Adjust height as needed */
+        max-height: 100px; 
         overflow-y: auto;
     }
     .calendar-day div {
-        margin-bottom: 4px; /* Space between appointments */
+        margin-bottom: 4px; 
     }
-    /* Hide scrollbar for Chrome, Safari and Opera */
     .calendar-day::-webkit-scrollbar {
         display: none;
     }
-    /* Hide scrollbar for IE, Edge and Firefox */
     .calendar-day {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none; 
+        scrollbar-width: none;  
+    }
+    .today {
+        background-color: #f0f8ff; 
     }
 </style>
 
@@ -127,10 +125,10 @@
         const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
         
         let calendarGrid = '';
+        const today = new Date().toISOString().split('T')[0]; 
         
-        // Days of the previous month
         const daysInWeek = 7;
-        const firstDayIndex = (firstDayOfMonth.getDay() + 6) % daysInWeek; // Adjusting Sunday as the first day
+        const firstDayIndex = (firstDayOfMonth.getDay() + 6) % daysInWeek; 
         for (let i = 0; i < firstDayIndex; i++) {
             const prevMonthDay = new Date(firstDayOfMonth);
             prevMonthDay.setDate(prevMonthDay.getDate() - (firstDayIndex - i));
@@ -139,26 +137,24 @@
                              </div>`;
         }
         
-        // Days of the current month
         for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
             const currentDay = new Date(currentYear, currentDate.getMonth(), i);
             const dateString = currentDay.toISOString().split('T')[0];
             let citaContent = '';
 
-            // Check if there are any appointments for this day
-            citas.forEach(cita => {
-                if (cita.fecha === dateString) {
-                    citaContent += `<div class="text-xs text-blue-500">${cita.hora} - ${cita.nombres} ${cita.apepat} ${cita.apemat}</div>`;
-                }
+            const dayCitas = citas.filter(cita => cita.fecha === dateString).sort((a, b) => a.hora.localeCompare(b.hora));
+            dayCitas.forEach(cita => {
+                citaContent += `<div class="text-xs text-blue-500">${cita.hora} - ${cita.nombres} ${cita.apepat} ${cita.apemat}</div>`;
             });
 
-            calendarGrid += `<div class="relative bg-white px-3 py-2 h-24 calendar-day">
+            const isToday = dateString === today ? 'today' : ''; 
+
+            calendarGrid += `<div class="relative bg-white px-3 py-2 h-24 calendar-day ${isToday}">
                                 <time datetime="${dateString}">${i}</time>
                                 ${citaContent}
                              </div>`;
         }
         
-        // Days of the next month
         const daysInNextMonth = daysInWeek * 6 - (firstDayIndex + lastDayOfMonth.getDate());
         for (let i = 1; i <= daysInNextMonth; i++) {
             const nextMonthDay = new Date(lastDayOfMonth);
@@ -170,7 +166,6 @@
         
         document.getElementById('calendar-grid').innerHTML = calendarGrid;
         
-        // Disable prev button if it's the current month
         document.getElementById('prev-month-btn').disabled = currentDate.getMonth() === initialDate.getMonth() && currentDate.getFullYear() === initialDate.getFullYear();
     }
 

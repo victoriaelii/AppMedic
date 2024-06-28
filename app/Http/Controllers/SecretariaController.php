@@ -156,8 +156,8 @@ class SecretariaController extends Controller
     // ********* CITAS
     public function tablaCitas(Request $request)
     {
-        $query = Citas::with(['paciente', 'medico']);
-
+        $query = Citas::with(['paciente', 'medico'])->where('activo', 'si');
+    
         if ($request->filled('nombre')) {
             $nombre = $request->input('nombre');
             $query->whereHas('paciente', function ($query) use ($nombre) {
@@ -166,15 +166,16 @@ class SecretariaController extends Controller
                       ->orWhere('apemat', 'like', "%{$nombre}%");
             });
         }
-
+    
         if ($request->filled('fecha')) {
             $fecha = $request->input('fecha');
             $query->whereDate('fecha', $fecha);
         }
-
+    
         $citas = $query->paginate(10);
         return view('opciones.citas.tablaCitas', compact('citas'));
     }
+    
 
     public function mostrarCitas()
     {
@@ -190,12 +191,32 @@ class SecretariaController extends Controller
     public function storeCitas(Request $request)
     {
         $request->validate([
-            'fecha' => 'required|date',
-            'hora' => ['required', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/'],
+            'fecha' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addMonths(2)->toDateString(),
+            'hora' => 'required|date_format:H:i|after_or_equal:10:00|before_or_equal:22:00',
             'pacienteid' => 'required|exists:pacientes,id',
             'medicoid' => 'required|exists:users,id',
         ]);
-
+    
+        // Verificar que el paciente no tenga más de una cita activa el mismo día
+        $existingAppointment = Citas::where('fecha', $request->fecha)
+            ->where('pacienteid', $request->pacienteid)
+            ->where('activo', 'si')
+            ->first();
+    
+        if ($existingAppointment) {
+            return back()->withErrors(['fecha' => 'El paciente ya tiene una cita activa agendada para esta fecha.'])->withInput();
+        }
+    
+        // Verificar que no haya citas duplicadas en la misma fecha y hora
+        $existingAppointmentSameHour = Citas::where('fecha', $request->fecha)
+            ->where('hora', $request->hora)
+            ->where('activo', 'si')
+            ->first();
+    
+        if ($existingAppointmentSameHour) {
+            return back()->withErrors(['hora' => 'Ya existe una cita activa a esta hora.'])->withInput();
+        }
+    
         Citas::create([
             'fecha' => $request->fecha,
             'hora' => $request->hora,
@@ -203,9 +224,11 @@ class SecretariaController extends Controller
             'medicoid' => $request->medicoid,
             'activo' => 'si',
         ]);
-
+    
         return redirect()->route('citas')->with('status', 'Cita registrada correctamente');
     }
+    
+    
 
     // Mostrar formulario para agregar una cita
     public function crearCita()
@@ -228,25 +251,50 @@ class SecretariaController extends Controller
     public function updateCita(Request $request, $id)
     {
         $request->validate([
-            'fecha' => 'required|date',
-            'hora' => 'required|date_format:H:i',
+            'fecha' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addMonths(2)->toDateString(),
+            'hora' => 'required|date_format:H:i|after_or_equal:10:00|before_or_equal:22:00',
             'pacienteid' => 'required|exists:pacientes,id'
         ]);
-
+    
+        // Verificar que el paciente no tenga más de una cita activa el mismo día
+        $existingAppointment = Citas::where('fecha', $request->fecha)
+            ->where('pacienteid', $request->pacienteid)
+            ->where('id', '!=', $id)
+            ->where('activo', 'si')
+            ->first();
+    
+        if ($existingAppointment) {
+            return back()->withErrors(['fecha' => 'El paciente ya tiene una cita activa agendada para esta fecha.'])->withInput();
+        }
+    
+        // Verificar que no haya citas duplicadas en la misma fecha y hora
+        $existingAppointmentSameHour = Citas::where('fecha', $request->fecha)
+            ->where('hora', $request->hora)
+            ->where('id', '!=', $id)
+            ->where('activo', 'si')
+            ->first();
+    
+        if ($existingAppointmentSameHour) {
+            return back()->withErrors(['hora' => 'Ya existe una cita activa a esta hora.'])->withInput();
+        }
+    
         $cita = Citas::findOrFail($id);
         $cita->update($request->all());
-
+    
         return redirect()->route('citas')->with('status', 'Cita actualizada correctamente');
     }
-
+    
     // Eliminar una cita (desactivar)
     public function eliminarCita($id)
     {
         $cita = Citas::findOrFail($id);
-        $cita->delete();
-
+        $cita->activo = 'no';
+        $cita->save();
+    
         return redirect()->route('tablaCitas')->with('status', 'Cita eliminada correctamente');
     }
+
+
 
     // calendar
     public function getCitasEventos()
