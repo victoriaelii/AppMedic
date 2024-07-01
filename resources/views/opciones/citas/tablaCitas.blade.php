@@ -53,10 +53,10 @@
                                             <!-- Enlace para editar la cita -->
                                             <a href="{{ route('citas.editar', $cita->id) }}" class="text-blue-600 hover:text-blue-900 transition">Editar</a>
                                             <!-- Formulario para eliminar la cita -->
-                                            <form action="{{ route('citas.eliminar', $cita->id) }}" method="POST" class="inline-block">
+                                            <form action="{{ route('citas.eliminar', $cita->id) }}" method="POST" class="inline-block delete-form">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 transition">Eliminar</button>
+                                                <button type="button" class="text-red-600 hover:text-red-900 transition delete-button">Eliminar</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -73,3 +73,33 @@
         </div>
     </div>
 </x-app-layout>
+
+<!-- Incluir SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Script para manejar la confirmación de eliminación -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteButtons = document.querySelectorAll('.delete-button');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const form = this.closest('.delete-form');
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "No podrás revertir esto",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>

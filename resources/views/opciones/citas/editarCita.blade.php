@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-guest-layout>
         <!-- Formulario para actualizar una cita -->
-        <form method="POST" action="{{ route('citas.update', $cita->id) }}">
+        <form method="POST" action="{{ route('citas.update', $cita->id) }}" id="updateForm">
             @csrf
             @method('PATCH')
 
@@ -17,19 +17,11 @@
                 <div class="mt-4">
                     <x-input-label for="hora" :value="__('Hora')" />
                     <select id="hora" name="hora" class="block mt-1 w-full" required>
-                        <option value="10:00" {{ $cita->hora == '10:00' ? 'selected' : '' }}>10:00 AM</option>
-                        <option value="11:00" {{ $cita->hora == '11:00' ? 'selected' : '' }}>11:00 AM</option>
-                        <option value="12:00" {{ $cita->hora == '12:00' ? 'selected' : '' }}>12:00 PM</option>
-                        <option value="13:00" {{ $cita->hora == '13:00' ? 'selected' : '' }}>1:00 PM</option>
-                        <option value="14:00" {{ $cita->hora == '14:00' ? 'selected' : '' }}>2:00 PM</option>
-                        <option value="15:00" {{ $cita->hora == '15:00' ? 'selected' : '' }}>3:00 PM</option>
-                        <option value="16:00" {{ $cita->hora == '16:00' ? 'selected' : '' }}>4:00 PM</option>
-                        <option value="17:00" {{ $cita->hora == '17:00' ? 'selected' : '' }}>5:00 PM</option>
-                        <option value="18:00" {{ $cita->hora == '18:00' ? 'selected' : '' }}>6:00 PM</option>
-                        <option value="19:00" {{ $cita->hora == '19:00' ? 'selected' : '' }}>7:00 PM</option>
-                        <option value="20:00" {{ $cita->hora == '20:00' ? 'selected' : '' }}>8:00 PM</option>
-                        <option value="21:00" {{ $cita->hora == '21:00' ? 'selected' : '' }}>9:00 PM</option>
-                        <option value="22:00" {{ $cita->hora == '22:00' ? 'selected' : '' }}>10:00 PM</option>
+                        @foreach (range(10, 22) as $hour)
+                            <option value="{{ sprintf('%02d:00:00', $hour) }}" {{ $cita->hora == sprintf('%02d:00:00', $hour) ? 'selected' : '' }}>
+                                {{ date('h:i A', strtotime(sprintf('%02d:00:00', $hour))) }}
+                            </option>
+                        @endforeach
                     </select>
                     <x-input-error :messages="$errors->get('hora')" class="mt-2" />
                 </div>
@@ -46,14 +38,50 @@
                     </select>
                     <x-input-error :messages="$errors->get('pacienteid')" class="mt-2" />
                 </div>
+
+                <!-- Selección de médico -->
+                <div class="mt-4 col-span-2">
+                    <x-input-label for="medicoid" :value="__('Médico')" />
+                    <select id="medicoid" name="medicoid" class="block mt-1 w-full" required>
+                        @foreach($medicos as $medico)
+                            <option value="{{ $medico->id }}" {{ $cita->medicoid == $medico->id ? 'selected' : '' }}>
+                                {{ $medico->nombres }} {{ $medico->apepat }} {{ $medico->apemat }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('medicoid')" class="mt-2" />
+                </div>
             </div>
 
             <!-- Botón para actualizar la cita -->
             <div class="flex items-center justify-end mt-4">
-                <x-primary-button class="ml-4">
+                <x-primary-button class="ml-4" id="updateButton">
                     {{ __('Actualizar Cita') }}
                 </x-primary-button>
             </div>
         </form>
     </x-guest-layout>
+
+    <!-- Script para SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('updateButton').addEventListener('click', function(event) {
+            event.preventDefault();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¿Quieres actualizar esta cita?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, actualizarla',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('updateForm').submit();
+                }
+            });
+        });
+    </script>
 </x-app-layout>

@@ -38,11 +38,11 @@
                                         <td class="px-6 py-4 text-left flex items-center space-x-2">
                                             <!-- Enlace para editar el producto -->
                                             <a href="{{ route('productos.editar', $producto->id) }}" class="text-blue-600 hover:text-blue-900 transition">Editar</a>
-                                            <!-- Formulario para eliminar el producto -->
-                                            <form action="{{ route('productos.eliminar', $producto->id) }}" method="POST" class="inline-block">
+                                            <!-- Botón para eliminar el producto con SweetAlert -->
+                                            <form action="{{ route('productos.eliminar', $producto->id) }}" method="POST" class="inline-block form-eliminar">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 transition">Eliminar</button>
+                                                <button type="submit" class="text-red-600 hover:text-red-900 transition eliminar-btn">Eliminar</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -58,4 +58,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Script para SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('.form-eliminar');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const button = form.querySelector('.eliminar-btn');
+
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esto!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminarlo',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </x-app-layout>

@@ -8,10 +8,10 @@ use App\Models\User;
 use App\Models\Citas;
 use App\Models\Servicio;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class SecretariaController extends Controller
 {
-    // Mostrar la vista principal de la secretaria
     public function index()
     {
         return view('/UsuarioSecretaria');
@@ -19,25 +19,21 @@ class SecretariaController extends Controller
 
     public function consultasForm()
     {
-        // Lógica para manejar la vista del formulario de consultas
         return view('opciones.consultas.consultasform');
     }
 
     public function porConsultar()
     {
-        $citas = Citas::with(['paciente', 'medico'])->paginate(10); // Ejemplo de cómo obtener citas con paginación y relaciones
+        $citas = Citas::with(['paciente', 'medico'])->paginate(10);
         return view('opciones.consultas.porConsultar', compact('citas'));
     }
 
     public function showForm($id)
     {
         $cita = Citas::findOrFail($id);
-        // Añade la lógica que necesites para mostrar el formulario de consulta
         return view('opciones.consultas.consultasform', compact('cita'));
     }
 
-    // ********* PACIENTES
-    // Guardar un nuevo paciente
     public function storePacientes(Request $request)
     {
         $request->validate([
@@ -55,21 +51,18 @@ class SecretariaController extends Controller
         return redirect()->route($redirect_to)->with('status', 'Paciente registrado correctamente');
     }
 
-    // Mostrar todos los pacientes activos
     public function mostrarPacientes()
     {
         $pacientes = Paciente::where('activo', 'si')->get();
         return view('/opciones.dashboardOpciones', compact('pacientes'));
     }
 
-    // Mostrar formulario para editar un paciente
     public function editarPaciente($id)
     {
         $paciente = Paciente::findOrFail($id);
         return view('/opciones.pacientes.editarPaciente', compact('paciente'));
     }
 
-    // Actualizar un paciente existente
     public function updatePaciente(Request $request, $id)
     {
         $request->validate([
@@ -87,7 +80,6 @@ class SecretariaController extends Controller
         return redirect()->route('dashboardOpciones')->with('status', 'Paciente actualizado correctamente');
     }
 
-    // Eliminar un paciente (desactivar)
     public function eliminarPaciente($id)
     {
         $paciente = Paciente::findOrFail($id);
@@ -96,15 +88,12 @@ class SecretariaController extends Controller
         return redirect()->route('dashboardOpciones')->with('status', 'Paciente eliminado correctamente');
     }
 
-    // ********* PRODUCTOS
-    // Mostrar todos los productos activos
     public function mostrarProductos()
     {
         $productos = Productos::where('activo', 'si')->get();
         return view('/opciones.productos.productos', compact('productos'));
     }
 
-    // Guardar un nuevo producto
     public function storeProductos(Request $request)
     {
         $request->validate([
@@ -117,20 +106,17 @@ class SecretariaController extends Controller
         return redirect()->route('productos')->with('status', 'Producto registrado correctamente');
     }
 
-    // Mostrar formulario para agregar un producto
     public function crearProducto()
     {
         return view('/opciones.productos.agregarProducto');
     }
 
-    // Mostrar formulario para editar un producto
     public function editarProducto($id)
     {
         $producto = Productos::findOrFail($id);
         return view('/opciones.productos.editarProducto', compact('producto'));
     }
 
-    // Actualizar un producto existente
     public function updateProducto(Request $request, $id)
     {
         $request->validate([
@@ -144,7 +130,6 @@ class SecretariaController extends Controller
         return redirect()->route('productos')->with('status', 'Producto actualizado correctamente');
     }
 
-    // Eliminar un producto (desactivar)
     public function eliminarProducto($id)
     {
         $producto = Productos::findOrFail($id);
@@ -153,10 +138,21 @@ class SecretariaController extends Controller
         return redirect()->route('productos')->with('status', 'Producto eliminado correctamente');
     }
 
-    // ********* CITAS
     public function tablaCitas(Request $request)
     {
-        $query = Citas::with(['paciente', 'medico'])->where('activo', 'si');
+        $this->desactivarCitasPasadas();
+    
+        $now = Carbon::now('America/Mexico_City');
+    
+        $query = Citas::with(['paciente', 'medico'])
+                      ->where('activo', 'si')
+                      ->where(function ($query) use ($now) {
+                          $query->where('fecha', '>', $now->toDateString())
+                                ->orWhere(function ($query) use ($now) {
+                                    $query->where('fecha', '=', $now->toDateString())
+                                          ->where('hora', '>', $now->toTimeString());
+                                });
+                      });
     
         if ($request->filled('nombre')) {
             $nombre = $request->input('nombre');
@@ -172,22 +168,42 @@ class SecretariaController extends Controller
             $query->whereDate('fecha', $fecha);
         }
     
-        $citas = $query->paginate(10);
+        $citas = $query->orderBy('fecha')->orderBy('hora')->paginate(10);
+    
         return view('opciones.citas.tablaCitas', compact('citas'));
     }
     
+    public function desactivarCitasPasadas()
+    {
+        $now = Carbon::now('America/Mexico_City');
+    
+        Citas::where(function ($query) use ($now) {
+            $query->where('fecha', '<', $now->toDateString())
+                  ->orWhere(function ($query) use ($now) {
+                      $query->where('fecha', '=', $now->toDateString())
+                            ->where('hora', '<', $now->toTimeString());
+                  });
+        })->where('activo', 'si')->update(['activo' => 'no']);
+    }
 
     public function mostrarCitas()
     {
-        $citas = Citas::select('citas.*', 'pacientes.nombres', 'pacientes.apepat', 'pacientes.apemat')
-                        ->join('pacientes', 'citas.pacienteid', '=', 'pacientes.id')
-                        ->where('citas.activo', 'si')
-                        ->get();
-
+        $now = Carbon::now('America/Mexico_City');
+        
+        $citas = Citas::with(['paciente', 'medico'])
+                      ->where(function ($query) use ($now) {
+                          $query->where('fecha', '>', $now->toDateString())
+                                ->orWhere(function ($query) use ($now) {
+                                    $query->where('fecha', '=', $now->toDateString())
+                                          ->where('hora', '>', $now->toTimeString());
+                                });
+                      })
+                      ->where('activo', 'si')
+                      ->get();
+        
         return view('/opciones.citas.citas', compact('citas'));
     }
 
-    // Guardar una nueva cita
     public function storeCitas(Request $request)
     {
         $request->validate([
@@ -197,7 +213,15 @@ class SecretariaController extends Controller
             'medicoid' => 'required|exists:users,id',
         ]);
     
-        // Verificar que el paciente no tenga más de una cita activa el mismo día
+        $fecha = $request->input('fecha');
+        $hora = $request->input('hora');
+        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $fecha . ' ' . $hora, 'America/Mexico_City');
+        $ahora = Carbon::now('America/Mexico_City');
+    
+        if ($fechaHoraCita->isPast()) {
+            return back()->withErrors(['hora' => 'Hora pasada. Elige una hora futura.'])->withInput();
+        }
+    
         $existingAppointment = Citas::where('fecha', $request->fecha)
             ->where('pacienteid', $request->pacienteid)
             ->where('activo', 'si')
@@ -207,7 +231,6 @@ class SecretariaController extends Controller
             return back()->withErrors(['fecha' => 'El paciente ya tiene una cita activa agendada para esta fecha.'])->withInput();
         }
     
-        // Verificar que no haya citas duplicadas en la misma fecha y hora
         $existingAppointmentSameHour = Citas::where('fecha', $request->fecha)
             ->where('hora', $request->hora)
             ->where('activo', 'si')
@@ -225,12 +248,10 @@ class SecretariaController extends Controller
             'activo' => 'si',
         ]);
     
-        return redirect()->route('citas')->with('status', 'Cita registrada correctamente');
+        $redirect_to = $request->input('redirect_to', 'tablaCitas');
+        return redirect()->route($redirect_to)->with('status', 'Cita registrada correctamente');
     }
     
-    
-
-    // Mostrar formulario para agregar una cita
     public function crearCita()
     {
         $pacientes = Paciente::where('activo', 'si')->get();
@@ -238,25 +259,32 @@ class SecretariaController extends Controller
         return view('opciones.citas.agregarCita', compact('pacientes', 'medicos'));
     }
 
-    // Mostrar formulario para editar una cita
     public function editarCita($id)
     {
         $cita = Citas::findOrFail($id);
         $pacientes = Paciente::where('activo', 'si')->get();
-        $usuarios = User::where('activo', 'si')->get();
-        return view('/opciones.citas.editarCita', compact('cita', 'pacientes', 'usuarios'));
+        $medicos = User::where('rol', 'medico')->where('activo', 'si')->get();
+        return view('/opciones.citas.editarCita', compact('cita', 'pacientes', 'medicos'));
     }
-
-    // Actualizar una cita existente
+    
     public function updateCita(Request $request, $id)
     {
         $request->validate([
             'fecha' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addMonths(2)->toDateString(),
             'hora' => 'required|date_format:H:i|after_or_equal:10:00|before_or_equal:22:00',
-            'pacienteid' => 'required|exists:pacientes,id'
+            'pacienteid' => 'required|exists:pacientes,id',
+            'medicoid' => 'required|exists:users,id',
         ]);
     
-        // Verificar que el paciente no tenga más de una cita activa el mismo día
+        $fecha = $request->input('fecha');
+        $hora = $request->input('hora');
+        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $fecha . ' ' . $hora, 'America/Mexico_City');
+        $ahora = Carbon::now('America/Mexico_City');
+    
+        if ($fechaHoraCita->isPast()) {
+            return back()->withErrors(['hora' => 'Hora pasada. Elige una hora futura.'])->withInput();
+        }
+    
         $existingAppointment = Citas::where('fecha', $request->fecha)
             ->where('pacienteid', $request->pacienteid)
             ->where('id', '!=', $id)
@@ -267,7 +295,6 @@ class SecretariaController extends Controller
             return back()->withErrors(['fecha' => 'El paciente ya tiene una cita activa agendada para esta fecha.'])->withInput();
         }
     
-        // Verificar que no haya citas duplicadas en la misma fecha y hora
         $existingAppointmentSameHour = Citas::where('fecha', $request->fecha)
             ->where('hora', $request->hora)
             ->where('id', '!=', $id)
@@ -279,12 +306,18 @@ class SecretariaController extends Controller
         }
     
         $cita = Citas::findOrFail($id);
-        $cita->update($request->all());
+        $cita->update([
+            'fecha' => $request->fecha,
+            'hora' => $request->hora,
+            'pacienteid' => $request->pacienteid,
+            'medicoid' => $request->medicoid,
+            'activo' => 'si',
+        ]);
     
         return redirect()->route('citas')->with('status', 'Cita actualizada correctamente');
     }
     
-    // Eliminar una cita (desactivar)
+    
     public function eliminarCita($id)
     {
         $cita = Citas::findOrFail($id);
@@ -294,14 +327,11 @@ class SecretariaController extends Controller
         return redirect()->route('tablaCitas')->with('status', 'Cita eliminada correctamente');
     }
 
-
-
-    // calendar
     public function getCitasEventos()
     {
         $citas = Citas::with('paciente')->where('activo', 'si')->get();
         $eventos = [];
-
+    
         foreach ($citas as $cita) {
             $eventos[] = [
                 'title' => $cita->paciente->nombres . ' ' . $cita->paciente->apepat,
@@ -309,12 +339,10 @@ class SecretariaController extends Controller
                 'paciente' => $cita->paciente->nombres . ' ' . $cita->paciente->apepat . ' ' . $cita->paciente->apemat,
             ];
         }
-
+    
         return response()->json($eventos);
     }
 
-    // ********* MEDICOS
-    // Mostrar todos los médicos activos
     public function mostrarMedicos()
     {
         $medicos = User::whereIn('rol', ['medico', 'secretaria', 'colaborador'])
@@ -323,7 +351,6 @@ class SecretariaController extends Controller
         return view('/opciones.medicos.medicos', compact('medicos'));
     }
 
-    // Guardar un nuevo médico
     public function storeMedicos(Request $request)
     {
         $request->validate([
@@ -337,7 +364,6 @@ class SecretariaController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Verificar si ya existe un médico registrado
         if ($request->rol === 'medico' && User::where('rol', 'medico')->exists()) {
             return redirect()->back()->withInput()->with('error', 'No se pueden registrar más de un doctor');
         }
@@ -356,20 +382,17 @@ class SecretariaController extends Controller
         return redirect()->route('medicos')->with('status', 'Médico registrado correctamente');
     }
 
-    // Mostrar formulario para agregar un médico
     public function crearMedico()
     {
         return view('/opciones.medicos.agregarMedico');
     }
 
-    // Mostrar formulario para editar un médico
     public function editarMedico($id)
     {
         $medico = User::findOrFail($id);
         return view('/opciones.medicos.editarMedico', compact('medico'));
     }
 
-    // Actualizar un médico existente
     public function updateMedico(Request $request, $id)
     {
         $request->validate([
@@ -396,7 +419,6 @@ class SecretariaController extends Controller
         return redirect()->route('medicos')->with('status', 'Médico actualizado correctamente');
     }
 
-    // Eliminar un médico (desactivar)
     public function eliminarMedico($id)
     {
         $medico = User::findOrFail($id);
@@ -405,15 +427,12 @@ class SecretariaController extends Controller
         return redirect()->route('medicos')->with('status', 'Médico eliminado correctamente');
     }
 
-    // ********* SERVICIOS
-    // Mostrar todos los servicios activos
     public function mostrarServicios()
     {
         $servicios = Servicio::where('activo', 'si')->get();
         return view('/opciones.servicios.servicios', compact('servicios'));
     }
 
-    // Guardar un nuevo servicio
     public function storeServicios(Request $request)
     {
         $request->validate([
@@ -426,20 +445,17 @@ class SecretariaController extends Controller
         return redirect()->route('servicios')->with('status', 'Servicio registrado correctamente');
     }
 
-    // Mostrar formulario para agregar un servicio
     public function crearServicio()
     {
         return view('/opciones.servicios.agregarServicio');
     }
 
-    // Mostrar formulario para editar un servicio
     public function editarServicio($id)
     {
         $servicio = Servicio::findOrFail($id);
         return view('/opciones.servicios.editarServicio', compact('servicio'));
     }
 
-    // Actualizar un servicio existente
     public function updateServicio(Request $request, $id)
     {
         $request->validate([
@@ -453,7 +469,6 @@ class SecretariaController extends Controller
         return redirect()->route('servicios')->with('status', 'Servicio actualizado correctamente');
     }
 
-    // Eliminar un servicio (desactivar)
     public function eliminarServicio($id)
     {
         $servicio = Servicio::findOrFail($id);

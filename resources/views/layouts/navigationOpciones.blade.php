@@ -33,8 +33,8 @@
                         <!-- Submenú para Citas -->
                         <div x-show="openCitas" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10" style="top: 100%;">
                             <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                                <a href="{{ route('citas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Citas') }}</a>
-                                <a href="{{ route('tablaCitas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Tabla Citas') }}</a>
+                                <a href="{{ route('citas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Calendario') }}</a>
+                                <a href="{{ route('tablaCitas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Tabla') }}</a>
                             </div>
                         </div>
                     </div>
@@ -121,8 +121,8 @@
                         <!-- Submenú para Citas -->
                         <div x-show="openCitas" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10" style="top: 100%;">
                             <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                                <a href="{{ route('citas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Citas') }}</a>
-                                <a href="{{ route('tablaCitas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Tabla Citas') }}</a>
+                                <a href="{{ route('citas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Calendario') }}</a>
+                                <a href="{{ route('tablaCitas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">{{ __('Tabla') }}</a>
                             </div>
                         </div>
                     </div>
@@ -149,7 +149,7 @@
                     <x-slot name="trigger">
                         <!-- Botón de Desplegable para el menú de configuración -->
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                            <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
 
                             <div class="ms-1">
                                 <!-- Icono de Flecha -->
@@ -208,10 +208,10 @@
             <!-- Enlace a Citas (versión responsiva) -->
             <div class="pt-2 pb-3 space-y-1">
                 <x-responsive-nav-link :href="route('citas')" :active="request()->routeIs('citas')">
-                    {{ __('Citas') }}
+                    {{ __('Calendario') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('tablaCitas')" :active="request()->routeIs('tablaCitas')">
-                    {{ __('Tabla Citas') }}
+                    {{ __('Tabla') }}
                 </x-responsive-nav-link>
             </div>
 
@@ -288,10 +288,10 @@
             <!-- Enlace a Citas (versión responsiva) -->
             <div class="pt-2 pb-3 space-y-1">
                 <x-responsive-nav-link :href="route('citas')" :active="request()->routeIs('citas')">
-                    {{ __('Citas') }}
+                    {{ __('Calendario') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('tablaCitas')" :active="request()->routeIs('tablaCitas')">
-                    {{ __('Tabla Citas') }}
+                    {{ __('Tabla') }}
                 </x-responsive-nav-link>
             </div>
 
@@ -313,7 +313,7 @@
         <!-- Opciones de Configuración Responsivas -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-base text-gray-800">{{ Auth::user()->nombres }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
             </div>
 
