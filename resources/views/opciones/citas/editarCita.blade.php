@@ -18,8 +18,12 @@
                     <x-input-label for="hora" :value="__('Hora')" />
                     <select id="hora" name="hora" class="block mt-1 w-full" required>
                         @foreach (range(10, 22) as $hour)
-                            <option value="{{ sprintf('%02d:00:00', $hour) }}" {{ $cita->hora == sprintf('%02d:00:00', $hour) ? 'selected' : '' }}>
-                                {{ date('h:i A', strtotime(sprintf('%02d:00:00', $hour))) }}
+                            @php
+                                $time = sprintf('%02d:00', $hour);
+                                $displayTime = date('h:i A', strtotime($time));
+                            @endphp
+                            <option value="{{ $time }}" {{ $cita->hora == $time ? 'selected' : '' }}>
+                                {{ $displayTime }}
                             </option>
                         @endforeach
                     </select>

@@ -23,6 +23,7 @@
                             <div class="flex space-x-4">
                                 <input type="text" name="nombre" placeholder="Nombre del Paciente" class="border border-gray-300 p-2 rounded-md" value="{{ request('nombre') }}">
                                 <input type="date" name="fecha" class="border border-gray-300 p-2 rounded-md" value="{{ request('fecha') }}">
+                                <input type="email" name="correo" placeholder="Correo del Paciente" class="border border-gray-300 p-2 rounded-md" value="{{ request('correo') }}">
                                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
                                     {{ __('Buscar') }}
                                 </button>
@@ -36,6 +37,7 @@
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Fecha</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Hora</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Paciente</th>
+                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Correo</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Médico</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Acciones</th>
                                 </tr>
@@ -48,7 +50,8 @@
                                         <td class="px-6 py-4 text-left">{{ $cita->fecha }}</td>
                                         <td class="px-6 py-4 text-left">{{ $cita->hora }}</td>
                                         <td class="px-6 py-4 text-left">{{ $cita->paciente->nombres }} {{ $cita->paciente->apepat }} {{ $cita->paciente->apemat }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $cita->medico->nombres }}</td>
+                                        <td class="px-6 py-4 text-left">{{ $cita->paciente->correo }}</td>
+                                        <td class="px-6 py-4 text-left">{{ $cita->medico->nombres }} {{ $cita->medico->apepat }}</td>
                                         <td class="px-6 py-4 text-left flex items-center space-x-2">
                                             <!-- Enlace para editar la cita -->
                                             <a href="{{ route('citas.editar', $cita->id) }}" class="text-blue-600 hover:text-blue-900 transition">Editar</a>

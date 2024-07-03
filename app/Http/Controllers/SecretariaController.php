@@ -168,10 +168,18 @@ class SecretariaController extends Controller
             $query->whereDate('fecha', $fecha);
         }
     
+        if ($request->filled('correo')) {
+            $correo = $request->input('correo');
+            $query->whereHas('paciente', function ($query) use ($correo) {
+                $query->where('correo', 'like', "%{$correo}%");
+            });
+        }
+    
         $citas = $query->orderBy('fecha')->orderBy('hora')->paginate(10);
     
         return view('opciones.citas.tablaCitas', compact('citas'));
     }
+    
     
     public function desactivarCitasPasadas()
     {
@@ -269,6 +277,10 @@ class SecretariaController extends Controller
     
     public function updateCita(Request $request, $id)
     {
+        // Convertir la hora de formato 12 horas a 24 horas
+        $hora = date('H:i', strtotime($request->hora));
+        $fecha = $request->input('fecha');
+    
         $request->validate([
             'fecha' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addMonths(2)->toDateString(),
             'hora' => 'required|date_format:H:i|after_or_equal:10:00|before_or_equal:22:00',
@@ -276,8 +288,6 @@ class SecretariaController extends Controller
             'medicoid' => 'required|exists:users,id',
         ]);
     
-        $fecha = $request->input('fecha');
-        $hora = $request->input('hora');
         $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $fecha . ' ' . $hora, 'America/Mexico_City');
         $ahora = Carbon::now('America/Mexico_City');
     
@@ -296,7 +306,7 @@ class SecretariaController extends Controller
         }
     
         $existingAppointmentSameHour = Citas::where('fecha', $request->fecha)
-            ->where('hora', $request->hora)
+            ->where('hora', $hora)
             ->where('id', '!=', $id)
             ->where('activo', 'si')
             ->first();
@@ -308,7 +318,7 @@ class SecretariaController extends Controller
         $cita = Citas::findOrFail($id);
         $cita->update([
             'fecha' => $request->fecha,
-            'hora' => $request->hora,
+            'hora' => $hora,
             'pacienteid' => $request->pacienteid,
             'medicoid' => $request->medicoid,
             'activo' => 'si',
