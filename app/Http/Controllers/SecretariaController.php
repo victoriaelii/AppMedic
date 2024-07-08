@@ -427,12 +427,11 @@ class SecretariaController extends Controller
         $medicos = User::where('rol', 'medico')->where('activo', 'si')->get();
         return view('/opciones.citas.editarCita', compact('cita', 'pacientes', 'medicos'));
     }
-    
-    // Actualiza una cita en la base de datos
+    // actualiz a cita
     public function updateCita(Request $request, $id)
     {
+        // Formatea la hora a H:i
         $hora = date('H:i', strtotime($request->hora));
-        $fecha = $request->input('fecha');
     
         // Valida los datos del formulario
         $request->validate([
@@ -442,33 +441,32 @@ class SecretariaController extends Controller
             'medicoid' => 'required|exists:users,id',
         ]);
     
-        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $fecha . ' ' . $hora, 'America/Mexico_City');
+        // Valida que la hora no sea pasada
+        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $request->fecha . ' ' . $hora, 'America/Mexico_City');
         $ahora = Carbon::now('America/Mexico_City');
-    
         if ($fechaHoraCita->isPast()) {
             return back()->withErrors(['hora' => 'Hora pasada. Elige una hora futura.'])->withInput();
         }
     
+        // Validaciones adicionales para citas existentes
         $existingAppointment = Citas::where('fecha', $request->fecha)
             ->where('pacienteid', $request->pacienteid)
             ->where('id', '!=', $id)
             ->where('activo', 'si')
             ->first();
-    
         if ($existingAppointment) {
             return back()->withErrors(['fecha' => 'El paciente ya tiene una cita activa agendada para esta fecha.'])->withInput();
         }
-    
         $existingAppointmentSameHour = Citas::where('fecha', $request->fecha)
             ->where('hora', $hora)
             ->where('id', '!=', $id)
             ->where('activo', 'si')
             ->first();
-    
         if ($existingAppointmentSameHour) {
             return back()->withErrors(['hora' => 'Ya existe una cita activa a esta hora.'])->withInput();
         }
     
+        // Actualiza la cita
         $cita = Citas::findOrFail($id);
         $cita->update([
             'fecha' => $request->fecha,
@@ -480,6 +478,7 @@ class SecretariaController extends Controller
     
         return redirect()->route('citas')->with('status', 'Cita actualizada correctamente');
     }
+    
     
     // Elimina (desactiva) una cita en la base de datos
     public function eliminarCita($id)
