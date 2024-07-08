@@ -1,4 +1,5 @@
 <x-app-layout>
+
     <x-guest-layout>
         <!-- Formulario para agregar un nuevo producto -->
         <form method="POST" action="{{ route('productos.store') }}">

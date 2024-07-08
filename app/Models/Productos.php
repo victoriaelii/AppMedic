@@ -9,14 +9,17 @@ class Productos extends Model
 {
     use HasFactory;
 
+    // atributos
     protected $fillable = [
-        'nombre',
-        'precio',
-        'activo'
+        'nombre', // Nombre del producto
+        'precio', // Precio del producto
+        'activo'  // Estado del producto (activo o no)
     ];
 
+    // Relación con la tabla de consultas
     public function consultas()
     {
+        // Un producto puede estar en muchas consultas
         return $this->belongsToMany(Consultas::class, 'consulta_producto');
     }
 }

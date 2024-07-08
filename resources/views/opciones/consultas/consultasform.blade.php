@@ -1,133 +1,142 @@
 <x-app-layout>
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Formulario de Consultas</h1>
-        <form>
-            <!-- Selección de Cita -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="cita">
-                    Seleccione una Cita
-                </label>
-                <select id="cita" name="cita" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <option value="">Seleccione una cita</option>
-                    <!-- Opciones de citas - aquí se mostrarían dinámicamente las citas disponibles -->
-                </select>
-            </div>
+    <!-- Contenedor principal con imagen de fondo -->
+    <div class="min-h-screen py-12" style="background-image: url('https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); background-size: cover; background-position: center;">
+        <!-- Contenedor interior centrado -->
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Caja con sombra y bordes redondeados -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden" style="background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px);">
+                <div class="p-6 text-gray-900">
+                    <!-- Formulario de registro de consulta -->
+                    <form id="consultasForm" method="POST">
+                        @csrf
+                        <!-- Campo oculto con el ID de la cita -->
+                        <input type="hidden" name="cita_id" value="{{ $cita->id }}">
 
-            <!-- Diagnóstico -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="diagnostico">
-                    Diagnóstico
-                </label>
-                <textarea id="diagnostico" name="diagnostico" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-            </div>
+                        <div>
+                            <h2 class="text-xl font-semibold mb-4">Registrar Consulta para {{ $cita->paciente->nombres }} {{ $cita->paciente->apepat }} {{ $cita->paciente->apemat }}</h2>
+                        </div>
 
-            <!-- Receta -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="receta">
-                    Receta
-                </label>
-                <textarea id="receta" name="receta" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-            </div>
+                        <!-- CAMPOS DE LA consulta -->
+                        <div class="mb-4">
+                            <label for="diagnostico" class="block text-gray-700">Diagnóstico:</label>
+                            <textarea name="diagnostico" id="diagnostico" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="recete" class="block text-gray-700">Receta:</label>
+                            <textarea name="recete" id="recete" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="signos_vitales" class="block text-gray-700">Signos Vitales:</label>
+                            <textarea name="signos_vitales" id="signos_vitales" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="motivo_consulta" class="block text-gray-700">Motivo de Consulta:</label>
+                            <textarea name="motivo_consulta" id="motivo_consulta" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="notas_padecimiento" class="block text-gray-700">Notas del Padecimiento:</label>
+                            <textarea name="notas_padecimiento" id="notas_padecimiento" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="examen_fisico" class="block text-gray-700">Examen Físico:</label>
+                            <textarea name="examen_fisico" id="examen_fisico" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="pronostico" class="block text-gray-700">Pronóstico:</label>
+                            <textarea name="pronostico" id="pronostico" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="plan" class="block text-gray-700">Plan de Tratamiento:</label>
+                            <textarea name="plan" id="plan" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="alergias" class="block text-gray-700">Alergias:</label>
+                            <textarea name="alergias" id="alergias" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        
+                        <!-- Servicios -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700">Servicios:</label>
+                            @foreach ($servicios as $servicio)
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="servicios[]" value="{{ $servicio->id }}" class="mr-2">
+                                    <label>{{ $servicio->nombre }}</label>
+                                </div>
+                            @endforeach
+                        </div>
 
-            <!-- Signos Vitales -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="signos_vitales">
-                    Signos Vitales
-                </label>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="talla" name="talla" placeholder="Talla" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <input type="text" id="peso" name="peso" placeholder="Peso" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <input type="text" id="temperatura" name="temperatura" placeholder="Temperatura" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <input type="text" id="saturacion" name="saturacion" placeholder="Saturación de Oxígeno" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <input type="text" id="presion" name="presion" placeholder="Presión Arterial" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <input type="text" id="frecuencia" name="frecuencia" placeholder="Frecuencia Cardíaca" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <!-- Productos -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700">Productos:</label>
+                            @foreach ($productos as $producto)
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="productos[]" value="{{ $producto->id }}" class="mr-2">
+                                    <label>{{ $producto->nombre }}</label>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Botón para guardar la consulta -->
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">Guardar Consulta</button>
+                    </form>
                 </div>
             </div>
-
-            <!-- Motivo de la Consulta -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="motivo">
-                    Motivo de la Consulta
-                </label>
-                <textarea id="motivo" name="motivo" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-            </div>
-
-            <!-- Notas de Padecimiento -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="notas">
-                    Notas de Padecimiento
-                </label>
-                <textarea id="notas" name="notas" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-            </div>
-
-            <!-- Examen Físico -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="examen_fisico">
-                    Examen Físico
-                </label>
-                <textarea id="examen_fisico" name="examen_fisico" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-            </div>
-
-            <!-- Pronóstico -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="pronostico">
-                    Pronóstico
-                </label>
-                <textarea id="pronostico" name="pronostico" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-            </div>
-
-
-            <!-- Agregar Servicios -->
-            <div class="mb-4">
-                <button type="button" class="text-blue-500 hover:underline" onclick="toggleSection('serviciosSection', this)">+ Agregar servicios</button>
-                <div id="serviciosSection" class="hidden mt-2">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Servicios Disponibles:</label>
-                    <div>
-                        <input type="checkbox" id="servicio1" name="servicio1" class="mr-2 leading-tight">
-                        <label for="servicio1">Fisioterapia </label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="servicio2" name="servicio2" class="mr-2 leading-tight">
-                        <label for="servicio2">Vacunación </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Agregar Productos -->
-            <div class="mb-4">
-                <button type="button" class="text-blue-500 hover:underline" onclick="toggleSection('productosSection', this)">+ Agregar productos</button>
-                <div id="productosSection" class="hidden mt-2">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Productos Disponibles:</label>
-                    <div>
-                        <input type="checkbox" id="producto1" name="producto1" class="mr-2 leading-tight">
-                        <label for="producto1">Termómetro Digital</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="producto2" name="producto2" class="mr-2 leading-tight">
-                        <label for="producto2">Banda Elástica de Resistencia</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botón para Terminar Consulta -->
-            <div class="flex items-center justify-center">
-                <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
-                    Terminar consulta
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
 
+    <!-- biblioteca SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function toggleSection(sectionId, button) {
-            var section = document.getElementById(sectionId);
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                button.textContent = button.textContent.replace('+', '-');
-            } else {
-                section.classList.add('hidden');
-                button.textContent = button.textContent.replace('-', '+');
-            }
-        }
+        document.getElementById('consultasForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let form = event.target;
+            let formData = new FormData(form);
+
+            // Enviar el formulario usando fetch
+            fetch('{{ route('consultas.store') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al guardar la consulta');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status) {
+                    let detalles = '';
+                    // Crear la lista de detalles de costos
+                    data.detalleCostos.forEach(detalle => {
+                        detalles += `${detalle.nombre}: $${parseFloat(detalle.precio).toFixed(2)}<br>`;
+                    });
+                    detalles += `Costo base de la consulta: $100.00<br>`;
+                    detalles += `<strong>Total a pagar: $${data.totalPagar.toFixed(2)}</strong>`;
+
+                    // Mostrar SweetAlert con los detalles
+                    Swal.fire({
+                        title: 'Consulta guardada',
+                        html: detalles,
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.href = "{{ route('consultas.porConsultar') }}";
+                    });
+                } else {
+                    throw new Error('Error al guardar la consulta');
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Error',
+                    text: error.message,
+                    icon: 'error'
+                });
+            });
+        });
     </script>
 </x-app-layout>

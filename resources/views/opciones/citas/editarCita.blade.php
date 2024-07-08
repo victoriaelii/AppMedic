@@ -19,8 +19,8 @@
                     <select id="hora" name="hora" class="block mt-1 w-full" required>
                         @foreach (range(10, 22) as $hour)
                             @php
-                                $time = sprintf('%02d:00', $hour);
-                                $displayTime = date('h:i A', strtotime($time));
+                                $time = sprintf('%02d:00:00', $hour); // Hora en formato HH:mm:ss
+                                $displayTime = date('h:i A', strtotime($time)); // Hora en formato 12 horas
                             @endphp
                             <option value="{{ $time }}" {{ $cita->hora == $time ? 'selected' : '' }}>
                                 {{ $displayTime }}

@@ -4,6 +4,7 @@ use App\Http\Controllers\SecretariaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+
 // Ruta para la página de bienvenida
 Route::get('/', function () {
     return view('welcome');
@@ -61,9 +62,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/opciones/servicios/eliminar/{id}', [SecretariaController::class, 'eliminarServicio'])->name('servicios.eliminar');
 
     // CONSULTAS
-    Route::get('/opciones/consultas', [SecretariaController::class, 'porConsultar'])->name('consultas.porConsultar');
-    Route::get('/consultasform/{id}', [SecretariaController::class, 'showForm'])->name('consultasform');
+    Route::get('/opciones/consultas/porConsultar', [SecretariaController::class, 'porConsultar'])->name('consultas.porConsultar');
+    Route::get('/consultasform/{id}', [SecretariaController::class, 'showForm'])->name('consultas.form');
+    Route::post('/opciones/consultas/store', [SecretariaController::class, 'storeConsultas'])->name('consultas.store');
+    Route::get('/consultas/edit/{id}', [SecretariaController::class, 'editConsultas'])->name('consultas.edit');
+    Route::patch('/consultas/update/{id}', [SecretariaController::class, 'updateConsultas'])->name('consultas.update');
+
 });
 
-// Incluir las rutas de autenticación
 require __DIR__.'/auth.php';

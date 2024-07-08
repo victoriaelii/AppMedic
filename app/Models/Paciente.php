@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Clase Paciente que representa el modelo de un paciente en el sistema.
+ * modelo dell paciente
  */
 class Paciente extends Model
 {

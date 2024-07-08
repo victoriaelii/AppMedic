@@ -4,7 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// Esta clase se usa para crear y eliminar la tabla 'productos' en la base de datos.
 return new class extends Migration
 {
     /**
