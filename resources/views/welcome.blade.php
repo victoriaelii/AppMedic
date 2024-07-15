@@ -86,9 +86,6 @@
                         <a href="{{ route('login') }}" class="button">
                             Iniciar sesión
                         </a>
-                        <a href="{{ route('register') }}" class="button">
-                            Regístrate
-                        </a>
                     @endauth
                 @endif
             </div>
