@@ -242,9 +242,6 @@
                           </div>`;
         });
 
-        if (currentDayCitas.length === 0) {
-            citasHtml = '<p class="text-gray-500">No hay citas para hoy.</p>';
-        }
 
         document.getElementById('current-day-citas-list').innerHTML = citasHtml;
     }
