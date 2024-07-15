@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    //se ejecuta cuando se aplica la migración
+    // Se ejecuta cuando se aplica la migración
     public function up(): void
     {
         Schema::create('consultas', function (Blueprint $table) {
@@ -23,10 +23,12 @@ return new class extends Migration
             $table->text('pronostico')->nullable(); // Columna para el pronóstico, permite valores nulos
             $table->text('plan')->nullable(); // Columna para el plan de tratamiento, permite valores nulos
             $table->text('alergias')->nullable(); // Columna para las alergias, permite valores nulos
+            $table->string('estado')->default('en curso'); // Columna para el estado, valor por defecto en curso
             $table->timestamps(); // Columna para timestamps, crea 'created_at' y 'updated_at'
         });
     }
-    // se ejecuta cuando se revierte la migración
+
+    // Se ejecuta cuando se revierte la migración
     public function down(): void
     {
         Schema::dropIfExists('consultas'); // Elimina la tabla 'consultas' si existe

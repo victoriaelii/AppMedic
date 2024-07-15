@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/opciones/consultas/store', [SecretariaController::class, 'storeConsultas'])->name('consultas.store');
     Route::get('/consultas/edit/{id}', [SecretariaController::class, 'editConsultas'])->name('consultas.edit');
     Route::patch('/consultas/update/{id}', [SecretariaController::class, 'updateConsultas'])->name('consultas.update');
+    Route::patch('/consultas/terminar/{id}', [SecretariaController::class, 'terminarConsulta'])->name('consultas.terminar');
 
 });
 

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('nombre', 100); // Columna para el nombre del producto.
             $table->decimal('precio', 10, 2); // Columna para el precio del producto.
             $table->enum('activo', ['si', 'no'])->default('si'); // Columna para el estado (activo o inactivo) del producto, por defecto es 'si'.
+            $table->integer('cantidad')->default(0); // Columna para la cantidad del producto.
+            $table->boolean('abastecer')->default(false); // Columna para indicar si el producto necesita ser abastecido.
             $table->timestamps(); // Columnas para las marcas de tiempo (creación y actualización).
         });
     }

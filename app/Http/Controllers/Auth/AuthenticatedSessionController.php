@@ -70,6 +70,8 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->route('dashboardOpciones');
             case 'admin':
                 return redirect()->route('dashboardOpciones');
+            case 'enfermera':
+                return redirect()->route('dashboardOpciones');
             default:
                 return redirect('/');
         }

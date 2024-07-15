@@ -59,7 +59,7 @@
                                             <form action="{{ route('citas.eliminar', $cita->id) }}" method="POST" class="inline-block delete-form">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="text-red-600 hover:text-red-900 transition delete-button">Eliminar</button>
+                                                <button type="button" class="text-red-600 hover:text-red-900 transition delete-button">Cancelar</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, eliminar'
+                confirmButtonText: 'Sí, cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();

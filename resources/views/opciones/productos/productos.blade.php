@@ -25,6 +25,7 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Nombre</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Precio</th>
+                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Cantidad</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Acciones</th>
                                 </tr>
                             </thead>
@@ -35,6 +36,7 @@
                                     <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
                                         <td class="px-6 py-4 text-left">{{ $producto->nombre }}</td>
                                         <td class="px-6 py-4 text-left">{{ $producto->precio }}</td>
+                                        <td class="px-6 py-4 text-left">{{ $producto->cantidad }}</td>
                                         <td class="px-6 py-4 text-left flex items-center space-x-2">
                                             <!-- Enlace para editar el producto -->
                                             <a href="{{ route('productos.editar', $producto->id) }}" class="text-blue-600 hover:text-blue-900 transition">Editar</a>

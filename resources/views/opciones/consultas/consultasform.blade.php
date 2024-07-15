@@ -59,7 +59,7 @@
                             <label class="block text-gray-700">Servicios:</label>
                             @foreach ($servicios as $servicio)
                                 <div class="flex items-center">
-                                    <input type="checkbox" name="servicios[]" value="{{ $servicio->id }}" class="mr-2">
+                                    <input type="checkbox" name="servicios[]" value="{{ $servicio->id }}" class="mr-2" data-precio="{{ $servicio->precio }}" onchange="actualizarTotal()">
                                     <label>{{ $servicio->nombre }}</label>
                                 </div>
                             @endforeach
@@ -69,11 +69,18 @@
                         <div class="mb-4">
                             <label class="block text-gray-700">Productos:</label>
                             @foreach ($productos as $producto)
-                                <div class="flex items-center">
-                                    <input type="checkbox" name="productos[]" value="{{ $producto->id }}" class="mr-2">
-                                    <label>{{ $producto->nombre }}</label>
+                                <div class="flex items-center mb-2">
+                                    <input type="checkbox" name="productos[{{ $producto->id }}][id]" value="{{ $producto->id }}" class="mr-2" onclick="toggleCantidad(this)" data-precio="{{ $producto->precio }}" onchange="actualizarTotal()">
+                                    <label>{{ $producto->nombre }} - ${{ number_format($producto->precio, 2) }}</label>
+                                    <input type="number" name="productos[{{ $producto->id }}][cantidad]" min="1" max="{{ $producto->cantidad }}" class="ml-4 p-2 border rounded-md w-20" disabled data-producto-id="{{ $producto->id }}" onchange="actualizarTotal()">
                                 </div>
                             @endforeach
+                        </div>
+
+                        <!-- Total a pagar -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700">Total a Pagar:</label>
+                            <input type="text" id="totalPagar" class="w-full px-3 py-2 border border-gray-300 rounded-md" readonly>
                         </div>
 
                         <!-- Botón para guardar la consulta -->
@@ -87,13 +94,48 @@
     <!-- biblioteca SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function toggleCantidad(checkbox) {
+            const cantidadInput = checkbox.parentElement.querySelector('input[type="number"]');
+            if (checkbox.checked) {
+                cantidadInput.disabled = false;
+                cantidadInput.value = ''; // Deja el campo vacío cuando se selecciona el check
+            } else {
+                cantidadInput.disabled = true;
+                cantidadInput.value = ''; // Deja el campo vacío cuando se quita el check
+            }
+            actualizarTotal(); // Actualizar el total cuando se selecciona/deselecciona un producto
+        }
+
+        function actualizarTotal() {
+            let total = 100; // Precio base de la consulta
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                const precio = parseFloat(checkbox.getAttribute('data-precio'));
+                if (checkbox.name.startsWith('productos')) {
+                    const cantidadInput = checkbox.parentElement.querySelector('input[type="number"]');
+                    const cantidad = parseFloat(cantidadInput.value) || 0;
+                    total += precio * cantidad;
+                } else {
+                    total += precio;
+                }
+            });
+            document.getElementById('totalPagar').value = `$${total.toFixed(2)}`;
+        }
+
         document.getElementById('consultasForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
             let form = event.target;
             let formData = new FormData(form);
 
-            // Enviar el formulario usando fetch
+            // cantidades de productos no seleccionados se establezcan en 0
+            document.querySelectorAll('input[type="number"][data-producto-id]').forEach(input => {
+                let checkbox = document.querySelector(`input[type="checkbox"][value="${input.dataset.productoId}"]`);
+                if (!checkbox.checked) {
+                    formData.append(input.name, 0);
+                }
+            });
+
+            // Enviar el formulario 
             fetch('{{ route('consultas.store') }}', {
                 method: 'POST',
                 headers: {
@@ -104,7 +146,9 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Error al guardar la consulta');
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Error al guardar la consulta');
+                    });
                 }
                 return response.json();
             })
@@ -113,7 +157,11 @@
                     let detalles = '';
                     // Crear la lista de detalles de costos
                     data.detalleCostos.forEach(detalle => {
-                        detalles += `${detalle.nombre}: $${parseFloat(detalle.precio).toFixed(2)}<br>`;
+                        if (detalle.tipo === 'servicio') {
+                            detalles += `${detalle.nombre}: $${parseFloat(detalle.precio).toFixed(2)}<br>`;
+                        } else {
+                            detalles += `${detalle.nombre} (Cantidad: ${detalle.cantidad}): $${parseFloat(detalle.precio).toFixed(2)}<br>`;
+                        }
                     });
                     detalles += `Costo base de la consulta: $100.00<br>`;
                     detalles += `<strong>Total a pagar: $${data.totalPagar.toFixed(2)}</strong>`;
@@ -138,5 +186,9 @@
                 });
             });
         });
+
+        // Inicializar el total al cargar la página
+        actualizarTotal();
+
     </script>
 </x-app-layout>

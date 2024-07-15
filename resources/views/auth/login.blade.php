@@ -2,6 +2,8 @@
 
 <!-- Usando el diseño de invitado -->
 <x-guest-layout>
+        <!-- Contenedor principal con imagen de fondo -->
+  
     <!-- Mostrar el estado de la sesión si existe -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

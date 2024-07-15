@@ -43,119 +43,196 @@ class SecretariaController extends Controller
         return view('opciones.consultas.consultasform', compact('cita', 'servicios', 'productos'));
     }
 
-    // Guarda una nueva consulta en la base de datos
+    // crear CONSULTA
     public function storeConsultas(Request $request)
     {
-        // Valida los datos del formulario
-        $request->validate([
-            'diagnostico' => 'required|string',
-            'recete' => 'required|string',
-            'signos_vitales' => 'nullable|string',
-            'motivo_consulta' => 'nullable|string',
-            'notas_padecimiento' => 'nullable|string',
-            'examen_fisico' => 'nullable|string',
-            'pronostico' => 'nullable|string',
-            'plan' => 'nullable|string',
-            'alergias' => 'nullable|string',
-            'servicios' => 'nullable|array',
-            'productos' => 'nullable|array',
-        ]);
-
-        // Crea la consulta con los datos del formulario
-        $consulta = Consultas::create([
-            'cita_id' => $request->cita_id,
-            'diagnostico' => $request->diagnostico,
-            'recete' => $request->recete,
-            'signos_vitales' => $request->signos_vitales,
-            'motivo_consulta' => $request->motivo_consulta,
-            'notas_padecimiento' => $request->notas_padecimiento,
-            'examen_fisico' => $request->examen_fisico,
-            'pronostico' => $request->pronostico,
-            'plan' => $request->plan,
-            'alergias' => $request->alergias,
-            'totalPagar' => 100, // Precio base de la consulta
-            'usuariomedicoid' => auth()->user()->id,
-        ]);
-
-        $totalPagar = 100; // Precio base de la consulta
-        $detalleCostos = [];
-
-        // Si hay servicios seleccionados, se agregan a la consulta y se suman al total
-        if ($request->has('servicios')) {
-            $servicios = Servicio::whereIn('id', $request->servicios)->get();
-            foreach ($servicios as $servicio) {
-                $consulta->servicios()->attach($servicio->id);
-                $totalPagar += $servicio->precio;
-                $detalleCostos[] = ['nombre' => $servicio->nombre, 'precio' => $servicio->precio];
+        try {
+            // Valida los datos del formulario
+            $request->validate([
+                'diagnostico' => 'required|string',
+                'recete' => 'required|string',
+                'signos_vitales' => 'nullable|string',
+                'motivo_consulta' => 'nullable|string',
+                'notas_padecimiento' => 'nullable|string',
+                'examen_fisico' => 'nullable|string',
+                'pronostico' => 'nullable|string',
+                'plan' => 'nullable|string',
+                'alergias' => 'nullable|string',
+                'servicios' => 'nullable|array',
+                'productos' => 'nullable|array',
+            ]);
+    
+            // Crea la consulta con los datos del formulario
+            $consulta = Consultas::create([
+                'cita_id' => $request->cita_id,
+                'diagnostico' => $request->diagnostico,
+                'recete' => $request->recete,
+                'signos_vitales' => $request->signos_vitales,
+                'motivo_consulta' => $request->motivo_consulta,
+                'notas_padecimiento' => $request->notas_padecimiento,
+                'examen_fisico' => $request->examen_fisico,
+                'pronostico' => $request->pronostico,
+                'plan' => $request->plan,
+                'alergias' => $request->alergias,
+                'totalPagar' => 100, 
+                'usuariomedicoid' => auth()->user()->id,
+            ]);
+    
+            $totalPagar = 100; // Precio base de la consulta
+            $detalleCostos = [];
+    
+            // Si hay servicios seleccionados, se agregan a la consulta y se suman al total
+            if ($request->has('servicios')) {
+                $servicios = Servicio::whereIn('id', $request->servicios)->get();
+                foreach ($servicios as $servicio) {
+                    $consulta->servicios()->attach($servicio->id);
+                    $totalPagar += $servicio->precio;
+                    $detalleCostos[] = ['nombre' => $servicio->nombre, 'precio' => $servicio->precio, 'cantidad' => 1, 'tipo' => 'servicio'];
+                }
             }
-        }
-
-        // Si hay productos seleccionados, se agregan a la consulta y se suman al total
-        if ($request->has('productos')) {
-            $productos = Productos::whereIn('id', $request->productos)->get();
-            foreach ($productos as $producto) {
-                $consulta->productos()->attach($producto->id);
-                $totalPagar += $producto->precio;
-                $detalleCostos[] = ['nombre' => $producto->nombre, 'precio' => $producto->precio];
+    
+            // Si hay productos seleccionados, se agregan a la consulta y se suman al total
+            if ($request->has('productos')) {
+                foreach ($request->productos as $productoData) {
+                    if (isset($productoData['id']) && isset($productoData['cantidad']) && $productoData['cantidad'] > 0) {
+                        $producto = Productos::findOrFail($productoData['id']);
+                        $cantidad = $productoData['cantidad'];
+                        $consulta->productos()->attach($producto->id, ['cantidad' => $cantidad]);
+                        $totalPagar += $producto->precio * $cantidad;
+                        $detalleCostos[] = ['nombre' => $producto->nombre, 'precio' => $producto->precio * $cantidad, 'cantidad' => $cantidad, 'tipo' => 'producto'];
+    
+                        // Restar la cantidad seleccionada del producto
+                        $producto->cantidad -= $cantidad;
+                        if ($producto->cantidad < 5) {
+                            $producto->abastecer = true;
+                            //  alerta de abastecimiento
+                            session()->flash('alert', 'El producto ' . $producto->nombre . ' necesita ser abastecido.');
+                        }
+                        $producto->save();
+                    }
+                }
             }
+    
+            // Actualiza el total a pagar en la consulta
+            $consulta->update(['totalPagar' => $totalPagar]);
+    
+            // Retorna una respuesta JSON con el estado, los detalles de costos y el total a pagar
+            return response()->json(['status' => true, 'detalleCostos' => $detalleCostos, 'totalPagar' => $totalPagar]);
+        } catch (\Exception $e) {
+            Log::error('Error al guardar la consulta: ' . $e->getMessage());
+            return response()->json(['status' => false, 'error' => $e->getMessage()]);
         }
-
-        // Actualiza el total a pagar en la consulta
-        $consulta->update(['totalPagar' => $totalPagar]);
-
-        // Retorna una respuesta JSON con el estado, los detalles de costos y el total a pagar
-        return response()->json(['status' => true, 'detalleCostos' => $detalleCostos, 'totalPagar' => $totalPagar]);
     }
+    
 
-    // Muestra el formulario para editar una consulta
     public function editConsultas($id)
     {
-        $consulta = Consultas::findOrFail($id);
+        $consulta = Consultas::with('productos')->findOrFail($id);
         $servicios = Servicio::where('activo', 'si')->get();
         $productos = Productos::where('activo', 'si')->get();
         return view('opciones.consultas.editConsulta', compact('consulta', 'servicios', 'productos'));
     }
     
-    // Actualiza una consulta en la base de datos
+    
+    
     public function updateConsultas(Request $request, $id)
     {
-        // Valida los datos del formulario
-        $request->validate([
-            'diagnostico' => 'required|string',
-            'recete' => 'required|string',
-            'signos_vitales' => 'nullable|string',
-            'motivo_consulta' => 'nullable|string',
-            'notas_padecimiento' => 'nullable|string',
-            'examen_fisico' => 'nullable|string',
-            'pronostico' => 'nullable|string',
-            'plan' => 'nullable|string',
-            'alergias' => 'nullable|string',
-            'servicios' => 'nullable|array',
-            'productos' => 'nullable|array',
-        ]);
-
-        // Encuentra la consulta y la actualiza con los nuevos datos
-        $consulta = Consultas::findOrFail($id);
-        $consulta->update([
-            'diagnostico' => $request->diagnostico,
-            'recete' => $request->recete,
-            'signos_vitales' => $request->signos_vitales,
-            'motivo_consulta' => $request->motivo_consulta,
-            'notas_padecimiento' => $request->notas_padecimiento,
-            'examen_fisico' => $request->examen_fisico,
-            'pronostico' => $request->pronostico,
-            'plan' => $request->plan,
-            'alergias' => $request->alergias,
-        ]);
-
-        // Sincroniza los servicios y productos seleccionados
-        $consulta->servicios()->sync($request->servicios);
-        $consulta->productos()->sync($request->productos);
-
-        // Redirige a la página de consultas pendientes con un mensaje de éxito
-        return redirect()->route('consultas.porConsultar')->with('status', 'Consulta actualizada correctamente');
+        try {
+            // Valida los datos del formulario
+            $request->validate([
+                'diagnostico' => 'required|string',
+                'recete' => 'required|string',
+                'signos_vitales' => 'nullable|string',
+                'motivo_consulta' => 'nullable|string',
+                'notas_padecimiento' => 'nullable|string',
+                'examen_fisico' => 'nullable|string',
+                'pronostico' => 'nullable|string',
+                'plan' => 'nullable|string',
+                'alergias' => 'nullable|string',
+                'servicios' => 'nullable|array',
+                'productos' => 'nullable|array',
+            ]);
+    
+            // Encuentra la consulta y la actualiza con los nuevos datos
+            $consulta = Consultas::findOrFail($id);
+            $consulta->update([
+                'diagnostico' => $request->diagnostico,
+                'recete' => $request->recete,
+                'signos_vitales' => $request->signos_vitales,
+                'motivo_consulta' => $request->motivo_consulta,
+                'notas_padecimiento' => $request->notas_padecimiento,
+                'examen_fisico' => $request->examen_fisico,
+                'pronostico' => $request->pronostico,
+                'plan' => $request->plan,
+                'alergias' => $request->alergias,
+            ]);
+    
+            $totalPagar = 100; // Precio base de la consulta
+            $detalleCostos = [];
+    
+            // Sincroniza los servicios seleccionados para el prellenado
+            if ($request->has('servicios')) {
+                $consulta->servicios()->sync($request->servicios);
+                $servicios = Servicio::whereIn('id', $request->servicios)->get();
+                foreach ($servicios as $servicio) {
+                    $totalPagar += $servicio->precio;
+                    $detalleCostos[] = ['nombre' => $servicio->nombre, 'precio' => $servicio->precio];
+                }
+            } else {
+                $consulta->servicios()->sync([]);
+            }
+    
+            // Sincroniza los productos seleccionados
+            $productosActuales = $consulta->productos->keyBy('id');
+            $consulta->productos()->detach();
+    
+            if ($request->has('productos')) {
+                foreach ($request->productos as $productoData) {
+                    if (isset($productoData['id']) && isset($productoData['cantidad']) && $productoData['cantidad'] > 0) {
+                        $producto = Productos::findOrFail($productoData['id']);
+                        $cantidadNueva = $productoData['cantidad'];
+                        $cantidadAnterior = $productosActuales[$productoData['id']]->pivot->cantidad ?? 0;
+                        $diferencia = $cantidadNueva - $cantidadAnterior;
+    
+                        $consulta->productos()->attach($producto->id, ['cantidad' => $cantidadNueva]);
+                        $totalPagar += $producto->precio * $cantidadNueva;
+                        $detalleCostos[] = ['nombre' => $producto->nombre, 'precio' => $producto->precio * $cantidadNueva, 'cantidad' => $cantidadNueva];
+    
+                        // Actualiza la cantidad del producto en el inventario
+                        $producto->cantidad -= $diferencia;
+                        if ($producto->cantidad < 5) {
+                            $producto->abastecer = true;
+                            session()->flash('alert', 'El producto ' . $producto->nombre . ' necesita ser abastecido.');
+                        }
+                        $producto->save();
+                    }
+                }
+            }
+    
+            // Actualiza el total a pagar en la consulta
+            $consulta->update(['totalPagar' => $totalPagar]);
+    
+            // Redirige a la página de consultas pendientes con un mensaje de éxito
+            return redirect()->route('consultas.porConsultar')->with('status', 'Consulta actualizada correctamente');
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar la consulta: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al actualizar la consulta');
+        }
     }
     
+    
+    
+    
+    // terminar la consulta 
+
+    public function terminarConsulta($id)
+    {
+        $consulta = Consultas::findOrFail($id);
+        $consulta->update(['estado' => 'finalizada']);
+
+        return redirect()->route('consultas.porConsultar')->with('status', 'Consulta finalizada correctamente');
+    }
+
     // Guarda un nuevo paciente en la base de datos
     public function storePacientes(Request $request)
     {
@@ -510,7 +587,7 @@ class SecretariaController extends Controller
     // Muestra la lista de médicos activos
     public function mostrarMedicos()
     {
-        $medicos = User::whereIn('rol', ['medico', 'secretaria', 'colaborador'])
+        $medicos = User::whereIn('rol', ['medico', 'secretaria', 'enfermera'])
                         ->where('activo', 'si')
                         ->get();
         return view('/opciones.medicos.medicos', compact('medicos'));
@@ -526,7 +603,7 @@ class SecretariaController extends Controller
             'apemat' => 'required|string|max:255',
             'fechanac' => 'required|date',
             'telefono' => 'required|string|max:20',
-            'rol' => ['required', 'in:medico,secretaria,colaborador,admin'],
+            'rol' => ['required', 'in:medico,secretaria,enfermera,admin'],
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);

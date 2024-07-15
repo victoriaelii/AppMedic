@@ -1,5 +1,4 @@
 <x-app-layout>
-
     <x-guest-layout>
         <!-- Formulario para agregar un nuevo producto -->
         <form method="POST" action="{{ route('productos.store') }}">
@@ -17,6 +16,13 @@
                 <x-input-label for="precio" :value="__('Precio')" />
                 <x-text-input id="precio" class="block mt-1 w-full" type="number" step="0.01" name="precio" :value="old('precio')" required />
                 <x-input-error :messages="$errors->get('precio')" class="mt-2" />
+            </div>
+
+            <!-- Cantidad -->
+            <div class="mt-4 col-span-2">
+                <x-input-label for="cantidad" :value="__('Cantidad')" />
+                <x-text-input id="cantidad" class="block mt-1 w-full" type="number" name="cantidad" :value="old('cantidad')" required />
+                <x-input-error :messages="$errors->get('cantidad')" class="mt-2" />
             </div>
 
             <!-- Botón para agregar el producto -->

@@ -18,6 +18,7 @@
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Fecha</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Hora</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Paciente</th>
+                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Total a Pagar</th>
                                     <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Acción</th>
                                 </tr>
                             </thead>
@@ -29,20 +30,38 @@
                                         <td class="px-6 py-4 text-left">{{ $cita->hora }}</td>
                                         <td class="px-6 py-4 text-left">{{ $cita->paciente->nombres }} {{ $cita->paciente->apepat }} {{ $cita->paciente->apemat }}</td>
                                         <td class="px-6 py-4 text-left">
-                                            @if($cita->consulta)
-                                                <!-- Si la consulta ya existe, mostrar botón para editar -->
-                                                <a href="{{ route('consultas.edit', $cita->consulta->id) }}">
-                                                    <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-                                                        {{ __('Editar consulta') }}
-                                                    </button>
-                                                </a>
+                                            @if($cita->consulta && $cita->consulta->estado == 'finalizada')
+                                                ${{ number_format($cita->consulta->totalPagar, 2) }}
                                             @else
-                                                <!-- Si no existe consulta, mostrar botón para crear una -->
-                                                <a href="{{ route('consultas.form', $cita->id) }}">
-                                                    <button class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
-                                                        {{ __('Ir a consulta') }}
-                                                    </button>
-                                                </a>
+                                                -
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 text-left">
+                                            @if($cita->consulta && $cita->consulta->estado == 'finalizada')
+                                                <span class="bg-green-600 text-white px-4 py-2 rounded-md">Listo</span>
+                                            @else
+                                                @if($cita->consulta)
+                                                    <!-- Si la consulta ya existe, mostrar botones para editar y terminar -->
+                                                    <a href="{{ route('consultas.edit', $cita->consulta->id) }}">
+                                                        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                                            {{ __('Editar consulta') }}
+                                                        </button>
+                                                    </a>
+                                                    <form action="{{ route('consultas.terminar', $cita->consulta->id) }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">
+                                                            {{ __('Terminar consulta') }}
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <!-- Si no existe consulta, mostrar botón para crear una -->
+                                                    <a href="{{ route('consultas.form', $cita->id) }}">
+                                                        <button class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+                                                            {{ __('Ir a consulta') }}
+                                                        </button>
+                                                    </a>
+                                                @endif
                                             @endif
                                         </td>
                                     </tr>

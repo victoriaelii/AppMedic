@@ -13,13 +13,15 @@ class Productos extends Model
     protected $fillable = [
         'nombre', // Nombre del producto
         'precio', // Precio del producto
-        'activo'  // Estado del producto (activo o no)
+        'activo',  // Estado del producto (activo o no)
+        'cantidad', // Cantidad del producto
+        'abastecer' // Indica si el producto necesita ser abastecido
     ];
 
     // Relación con la tabla de consultas
     public function consultas()
     {
         // Un producto puede estar en muchas consultas
-        return $this->belongsToMany(Consultas::class, 'consulta_producto');
+        return $this->belongsToMany(Consultas::class, 'consulta_producto')->withPivot('cantidad');
     }
 }

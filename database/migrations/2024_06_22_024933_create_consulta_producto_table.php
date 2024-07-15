@@ -13,6 +13,7 @@ return new class extends Migration
             $table->id(); // Columna de ID, llave primaria
             $table->foreignId('consulta_id')->constrained('consultas')->onDelete('cascade'); // Llave foránea que referencia a la tabla 'consultas', elimina en cascada
             $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade'); // Llave foránea que referencia a la tabla 'productos', elimina en cascada
+            $table->integer('cantidad')->default(1); // Columna para la cantidad del producto en la consulta
             $table->timestamps(); // Columnas para timestamps, crea 'created_at' y 'updated_at'
         });
     }
