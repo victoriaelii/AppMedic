@@ -22,7 +22,8 @@ class Consultas extends Model
         'pronostico',          
         'plan',                
         'alergias',            
-        'estado'               
+        'estado',              
+        'enfermera_id', 
     ];
 
     protected $casts = [
@@ -42,5 +43,10 @@ class Consultas extends Model
     public function productos()
     {
         return $this->belongsToMany(Productos::class, 'consulta_producto', 'consulta_id', 'producto_id')->withPivot('cantidad');
+    }
+
+    public function enfermera()
+    {
+        return $this->belongsTo(User::class, 'enfermera_id');
     }
 }

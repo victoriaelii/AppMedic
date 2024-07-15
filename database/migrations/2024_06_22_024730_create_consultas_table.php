@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text('plan')->nullable(); // Columna para el plan de tratamiento, permite valores nulos
             $table->text('alergias')->nullable(); // Columna para las alergias, permite valores nulos
             $table->string('estado')->default('en curso'); // Columna para el estado, valor por defecto en curso
+            $table->foreignId('enfermera_id')->nullable()->constrained('users')->nullOnDelete(); // Campo enfermera_id
             $table->timestamps(); // Columna para timestamps, crea 'created_at' y 'updated_at'
         });
     }

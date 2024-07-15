@@ -77,6 +77,17 @@
                             @endforeach
                         </div>
 
+                        <!-- Enfermera -->
+                        <div class="mb-4">
+                            <label for="enfermera_id" class="block text-gray-700">Enfermera (opcional):</label>
+                            <select name="enfermera_id" id="enfermera_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">Seleccionar enfermera</option>
+                                @foreach ($enfermeras as $enfermera)
+                                    <option value="{{ $enfermera->id }}">{{ $enfermera->nombres }} {{ $enfermera->apepat }} ({{ $enfermera->email }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <!-- Total a pagar -->
                         <div class="mb-4">
                             <label class="block text-gray-700">Total a Pagar:</label>

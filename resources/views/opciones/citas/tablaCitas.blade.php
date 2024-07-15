@@ -19,15 +19,16 @@
                             </a>
                         </div>
                         <!-- Formulario de búsqueda -->
-                        <form method="GET" action="{{ route('tablaCitas') }}" class="mb-4">
-                            <div class="flex space-x-4">
-                                <input type="text" name="nombre" placeholder="Nombre del Paciente" class="border border-gray-300 p-2 rounded-md" value="{{ request('nombre') }}">
-                                <input type="date" name="fecha" class="border border-gray-300 p-2 rounded-md" value="{{ request('fecha') }}">
-                                <input type="email" name="correo" placeholder="Correo del Paciente" class="border border-gray-300 p-2 rounded-md" value="{{ request('correo') }}">
-                                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-                                    {{ __('Buscar') }}
-                                </button>
-                            </div>
+                        <form method="GET" action="{{ route('tablaCitas') }}" class="mb-4 flex space-x-4">
+                            <input type="text" name="nombre" placeholder="Nombre del Paciente" class="border border-gray-300 p-2 rounded-md" value="{{ request('nombre') }}">
+                            <input type="date" name="fecha" class="border border-gray-300 p-2 rounded-md" value="{{ request('fecha') }}">
+                            <input type="email" name="correo" placeholder="Correo del Paciente" class="border border-gray-300 p-2 rounded-md" value="{{ request('correo') }}">
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                                {{ __('Buscar') }}
+                            </button>
+                            <a href="{{ route('tablaCitas') }}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">
+                                {{ __('Limpiar') }}
+                            </a>
                         </form>
                         <!-- Tabla de citas -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);">

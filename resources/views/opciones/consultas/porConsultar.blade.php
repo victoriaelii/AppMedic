@@ -38,26 +38,29 @@
                                         </td>
                                         <td class="px-6 py-4 text-left">
                                             @if($cita->consulta && $cita->consulta->estado == 'finalizada')
-                                                <span class="bg-green-600 text-white px-4 py-2 rounded-md">Listo</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="green" class="size-6">
+                                                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                                                  </svg>
+                                                  
                                             @else
                                                 @if($cita->consulta)
                                                     <!-- Si la consulta ya existe, mostrar botones para editar y terminar -->
                                                     <a href="{{ route('consultas.edit', $cita->consulta->id) }}">
-                                                        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-                                                            {{ __('Editar consulta') }}
+                                                        <button class="bg-blue-100 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-200 transition">
+                                                            {{ __('Editar') }}
                                                         </button>
                                                     </a>
                                                     <form action="{{ route('consultas.terminar', $cita->consulta->id) }}" method="POST" style="display:inline;">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">
-                                                            {{ __('Terminar consulta') }}
+                                                        <button type="submit" class="bg-red-100 text-red-500 px-4 py-2 rounded-md hover:bg-red-200 transition">
+                                                            {{ __('Terminar') }}
                                                         </button>
                                                     </form>
                                                 @else
                                                     <!-- Si no existe consulta, mostrar botón para crear una -->
                                                     <a href="{{ route('consultas.form', $cita->id) }}">
-                                                        <button class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+                                                        <button class="bg-green-100 text-green-500 px-4 py-2 rounded-md hover:bg-green-200 transition">
                                                             {{ __('Ir a consulta') }}
                                                         </button>
                                                     </a>

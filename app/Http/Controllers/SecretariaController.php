@@ -40,7 +40,8 @@ class SecretariaController extends Controller
         $cita = Citas::findOrFail($id);
         $servicios = Servicio::where('activo', 'si')->get();
         $productos = Productos::where('activo', 'si')->get();
-        return view('opciones.consultas.consultasform', compact('cita', 'servicios', 'productos'));
+        $enfermeras = User::where('rol', 'enfermera')->get(); // Obtener lista de enfermeras activas
+        return view('opciones.consultas.consultasform', compact('cita', 'servicios', 'productos', 'enfermeras'));
     }
 
     // crear CONSULTA
@@ -60,6 +61,7 @@ class SecretariaController extends Controller
                 'alergias' => 'nullable|string',
                 'servicios' => 'nullable|array',
                 'productos' => 'nullable|array',
+                'enfermera_id' => 'nullable|exists:users,id',
             ]);
     
             // Crea la consulta con los datos del formulario
@@ -76,6 +78,7 @@ class SecretariaController extends Controller
                 'alergias' => $request->alergias,
                 'totalPagar' => 100, 
                 'usuariomedicoid' => auth()->user()->id,
+                'enfermera_id' => $request->enfermera_id, // Agregar enfermera_id
             ]);
     
             $totalPagar = 100; // Precio base de la consulta
@@ -119,7 +122,7 @@ class SecretariaController extends Controller
             // Retorna una respuesta JSON con el estado, los detalles de costos y el total a pagar
             return response()->json(['status' => true, 'detalleCostos' => $detalleCostos, 'totalPagar' => $totalPagar]);
         } catch (\Exception $e) {
-            Log::error('Error al guardar la consulta: ' . $e->getMessage());
+            \Log::error('Error al guardar la consulta: ' . $e->getMessage());
             return response()->json(['status' => false, 'error' => $e->getMessage()]);
         }
     }
@@ -130,10 +133,9 @@ class SecretariaController extends Controller
         $consulta = Consultas::with('productos')->findOrFail($id);
         $servicios = Servicio::where('activo', 'si')->get();
         $productos = Productos::where('activo', 'si')->get();
-        return view('opciones.consultas.editConsulta', compact('consulta', 'servicios', 'productos'));
+        $enfermeras = User::where('rol', 'enfermera')->get(); // Obtener lista de enfermeras activas
+        return view('opciones.consultas.editConsulta', compact('consulta', 'servicios', 'productos', 'enfermeras'));
     }
-    
-    
     
     public function updateConsultas(Request $request, $id)
     {
@@ -151,6 +153,7 @@ class SecretariaController extends Controller
                 'alergias' => 'nullable|string',
                 'servicios' => 'nullable|array',
                 'productos' => 'nullable|array',
+                'enfermera_id' => 'nullable|exists:users,id',
             ]);
     
             // Encuentra la consulta y la actualiza con los nuevos datos
@@ -165,6 +168,7 @@ class SecretariaController extends Controller
                 'pronostico' => $request->pronostico,
                 'plan' => $request->plan,
                 'alergias' => $request->alergias,
+                'enfermera_id' => $request->enfermera_id, // Actualizar enfermera_id
             ]);
     
             $totalPagar = 100; // Precio base de la consulta
@@ -215,16 +219,12 @@ class SecretariaController extends Controller
             // Redirige a la página de consultas pendientes con un mensaje de éxito
             return redirect()->route('consultas.porConsultar')->with('status', 'Consulta actualizada correctamente');
         } catch (\Exception $e) {
-            Log::error('Error al actualizar la consulta: ' . $e->getMessage());
+            \Log::error('Error al actualizar la consulta: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al actualizar la consulta');
         }
     }
     
-    
-    
-    
     // terminar la consulta 
-
     public function terminarConsulta($id)
     {
         $consulta = Consultas::findOrFail($id);
