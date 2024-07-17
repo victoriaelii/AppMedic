@@ -13,7 +13,7 @@
                 </div>
 
                 <!-- Enlaces de Navegación -->
-                @if(Auth::user()->rol == 'medico')
+                @if(Auth::user()->rol == 'medico' || Auth::user()->rol == 'secretaria')
                     <!-- Enlace a Pacientes -->
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('dashboardOpciones')" :active="request()->routeIs('dashboardOpciones')">

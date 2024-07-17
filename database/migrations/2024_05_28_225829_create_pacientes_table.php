@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('correo', 100)->unique(); // Columna para el correo electrónico, que debe ser único.
             $table->string('telefono', 20); // Columna para el teléfono.
             $table->enum('activo', ['si', 'no'])->default('si'); // Columna para el estado (activo o inactivo) del paciente, por defecto es 'si'.
+            $table->longText('historial_medico')->nullable(); // Columna para el historial médico del paciente.
             $table->timestamps(); // Columnas para las marcas de tiempo (creación y actualización).
         });
     }

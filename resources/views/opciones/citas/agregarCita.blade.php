@@ -33,30 +33,23 @@
                     <x-input-error :messages="$errors->get('hora')" class="mt-2" />
                 </div>
 
-                <!-- Selección de paciente -->
+                <!-- Búsqueda de paciente -->
                 <div class="mt-4 col-span-2">
-                    <x-input-label for="pacienteid" :value="__('Paciente')" />
-                    <select id="pacienteid" name="pacienteid" class="block mt-1 w-full" required>
-                        @foreach($pacientes as $paciente)
-                            <option value="{{ $paciente->id }}" {{ old('pacienteid') == $paciente->id ? 'selected' : '' }}>
-                                {{ $paciente->nombres }} {{ $paciente->apepat }} {{ $paciente->apemat }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <x-input-label for="paciente_search" :value="__('Buscar Paciente')" />
+                    <x-text-input id="paciente_search" class="block mt-1 w-full" type="text" name="paciente_search" placeholder="Buscar paciente por nombre, apellido o correo" autocomplete="off" />
                     <x-input-error :messages="$errors->get('pacienteid')" class="mt-2" />
+
+                    <div id="paciente_suggestions" class="mt-2 bg-white border rounded shadow-lg"></div>
                 </div>
 
-                <!-- Selección de médico -->
+                <!-- Campo oculto para almacenar el ID del paciente seleccionado -->
+                <input type="hidden" name="pacienteid" id="pacienteid" value="{{ old('pacienteid') }}" required />
+
+                <!-- Mostrar médico -->
                 <div class="mt-4 col-span-2">
-                    <x-input-label for="medicoid" :value="__('Médico')" />
-                    <select id="medicoid" name="medicoid" class="block mt-1 w-full" required>
-                        @foreach($medicos as $medico)
-                            <option value="{{ $medico->id }}" {{ old('medicoid') == $medico->id ? 'selected' : '' }}>
-                                {{ $medico->nombres }} {{ $medico->apepat }} {{ $medico->apemat }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <x-input-error :messages="$errors->get('medicoid')" class="mt-2" />
+                    <x-input-label for="medico" :value="__('Médico')" />
+                    <x-text-input id="medico" class="block mt-1 w-full" type="text" name="medico" value="{{ $medicos->first()->nombres }} {{ $medicos->first()->apepat }} {{ $medicos->first()->apemat }}" readonly />
+                    <input type="hidden" name="medicoid" id="medicoid" value="{{ $medicos->first()->id }}" />
                 </div>
             </div>
 
@@ -73,5 +66,37 @@
             </button>
         </a>
         
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const pacienteSearch = document.getElementById('paciente_search');
+                const pacienteSuggestions = document.getElementById('paciente_suggestions');
+                const pacienteId = document.getElementById('pacienteid');
+
+                pacienteSearch.addEventListener('input', function () {
+                    const query = pacienteSearch.value;
+
+                    if (query.length > 2) {
+                        fetch(`/buscarPaciente?q=${query}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                pacienteSuggestions.innerHTML = '';
+                                data.forEach(paciente => {
+                                    const div = document.createElement('div');
+                                    div.textContent = `${paciente.nombres} ${paciente.apepat} ${paciente.apemat} - ${paciente.correo}`;
+                                    div.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
+                                    div.addEventListener('click', function () {
+                                        pacienteId.value = paciente.id;
+                                        pacienteSearch.value = `${paciente.nombres} ${paciente.apepat} ${paciente.apemat}`;
+                                        pacienteSuggestions.innerHTML = '';
+                                    });
+                                    pacienteSuggestions.appendChild(div);
+                                });
+                            });
+                    } else {
+                        pacienteSuggestions.innerHTML = '';
+                    }
+                });
+            });
+        </script>
     </x-guest-layout>
 </x-app-layout>

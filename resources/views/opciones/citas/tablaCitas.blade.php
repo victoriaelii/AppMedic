@@ -69,7 +69,7 @@
                         </table>
                         <!-- Mensaje si no hay citas registradas -->
                         @if($citas->isEmpty())
-                            <p class="text-center text-gray-500 mt-4">No hay citas registradas.</p>
+                            <p class="text-center text-gray-500 mt-4">No hay citas pendientes.</p>
                         @endif
                     </div>
                 </div>

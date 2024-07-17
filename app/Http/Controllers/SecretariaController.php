@@ -10,6 +10,7 @@ use App\Models\Servicio;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Consultas; 
+use PDF; 
 
 // Controlador que maneja las funciones de la secretaria
 class SecretariaController extends Controller
@@ -19,7 +20,20 @@ class SecretariaController extends Controller
     {
         return view('/UsuarioSecretaria');
     }
-
+    public function mostrarHistorialMedico($id)
+    {
+        $paciente = Paciente::with(['citas.consulta.servicios', 'citas.consulta.productos'])->findOrFail($id);
+        return view('opciones.pacientes.historial_medico', compact('paciente'));
+    }
+    
+    public function descargarHistorialMedicoPdf($id)
+    {
+        $paciente = Paciente::with(['citas.consulta.servicios', 'citas.consulta.productos'])->findOrFail($id);
+        
+        $pdf = PDF::loadView('opciones.pacientes.historial_medico_pdf', compact('paciente'));
+        return $pdf->download('historial_medico_'.$paciente->id.'.pdf');
+    }
+    
     // Muestra el formulario de consultas
     public function consultasForm()
     {
@@ -363,47 +377,65 @@ class SecretariaController extends Controller
     }
 
     // Muestra la tabla de citas
+    // Método para desactivar citas que tienen consulta asociada
+    private function desactivarCitasConConsulta()
+    {
+        // Obtener todas las citas que tienen una consulta asociada
+        $citasConConsulta = Citas::has('consulta')->where('activo', 'si')->get();
+
+        // Iterar sobre cada cita y actualizar el campo activo a 'no'
+        foreach ($citasConConsulta as $cita) {
+            $cita->activo = 'no';
+            $cita->save();
+        }
+    }
+
+    // Muestra la tabla de citas
     public function tablaCitas(Request $request)
     {
-        $this->desactivarCitasPasadas();
-    
+        // Desactivar citas que tienen consulta asociada
+        $this->desactivarCitasConConsulta();
+
         $now = Carbon::now('America/Mexico_City');
-    
+
         $query = Citas::with(['paciente', 'medico'])
-                      ->where('activo', 'si')
-                      ->where(function ($query) use ($now) {
-                          $query->where('fecha', '>', $now->toDateString())
+                    ->where('activo', 'si') // Solo citas activas
+                    ->where(function ($query) use ($now) {
+                        $query->where('fecha', '>', $now->toDateString())
                                 ->orWhere(function ($query) use ($now) {
                                     $query->where('fecha', '=', $now->toDateString())
-                                          ->where('hora', '>', $now->toTimeString());
+                                        ->where('hora', '>', $now->toTimeString());
                                 });
-                      });
-    
+                    });
+
+        // Aplicar filtros adicionales si se especifican en la búsqueda
         if ($request->filled('nombre')) {
             $nombre = $request->input('nombre');
             $query->whereHas('paciente', function ($query) use ($nombre) {
                 $query->where('nombres', 'like', "%{$nombre}%")
-                      ->orWhere('apepat', 'like', "%{$nombre}%")
-                      ->orWhere('apemat', 'like', "%{$nombre}%");
+                    ->orWhere('apepat', 'like', "%{$nombre}%")
+                    ->orWhere('apemat', 'like', "%{$nombre}%");
             });
         }
-    
+
         if ($request->filled('fecha')) {
             $fecha = $request->input('fecha');
             $query->whereDate('fecha', $fecha);
         }
-    
+
         if ($request->filled('correo')) {
             $correo = $request->input('correo');
             $query->whereHas('paciente', function ($query) use ($correo) {
                 $query->where('correo', 'like', "%{$correo}%");
             });
         }
-    
+
+        // Obtener las citas ordenadas por fecha y hora, paginadas
         $citas = $query->orderBy('fecha')->orderBy('hora')->paginate(10);
-    
+
         return view('opciones.citas.tablaCitas', compact('citas'));
     }
+
     
     // Desactiva las citas pasadas
     public function desactivarCitasPasadas()
@@ -487,7 +519,21 @@ class SecretariaController extends Controller
         $redirect_to = $request->input('redirect_to', 'tablaCitas');
         return redirect()->route($redirect_to)->with('status', 'Cita registrada correctamente');
     }
+
+    public function buscarPaciente(Request $request)
+    {
+        $query = $request->input('q');
+        $pacientes = Paciente::where('nombres', 'like', "%{$query}%")
+            ->orWhere('apepat', 'like', "%{$query}%")
+            ->orWhere('apemat', 'like', "%{$query}%")
+            ->orWhere('correo', 'like', "%{$query}%")
+            ->get(['id', 'nombres', 'apepat', 'apemat', 'correo']);
     
+        return response()->json($pacientes);
+    }
+    
+
+
     // Muestra el formulario para agregar una nueva cita
     public function crearCita()
     {

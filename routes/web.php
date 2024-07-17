@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/opciones/citas/eliminar/{id}', [SecretariaController::class, 'eliminarCita'])->name('citas.eliminar');
     Route::get('/opciones/citas/agregar', [SecretariaController::class, 'crearCita'])->name('crearCita');
     Route::get('/opciones/citas/tablaCitas', [SecretariaController::class, 'tablaCitas'])->name('tablaCitas');
+    Route::get('/buscarPaciente', [SecretariaController::class, 'buscarPaciente']);
 
     // Rutas para la gestión de médicos
     Route::get('/opciones/medicos', [SecretariaController::class, 'mostrarMedicos'])->name('medicos');
@@ -68,6 +69,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/consultas/edit/{id}', [SecretariaController::class, 'editConsultas'])->name('consultas.edit');
     Route::patch('/consultas/update/{id}', [SecretariaController::class, 'updateConsultas'])->name('consultas.update');
     Route::patch('/consultas/terminar/{id}', [SecretariaController::class, 'terminarConsulta'])->name('consultas.terminar');
+
+
+
+    // Ruta para mostrar el historial médico
+    Route::get('/historial-medico/{id}', [SecretariaController::class, 'mostrarHistorialMedico'])->name('historialMedico.show');
+    // Ruta para descargar el historial médico en PDF
+    Route::get('/historial-medico/{id}/pdf', [SecretariaController::class, 'descargarHistorialMedicoPdf'])->name('historialMedico.pdf');
 
 });
 

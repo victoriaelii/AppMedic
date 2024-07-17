@@ -17,7 +17,6 @@
                                     {{ __('Registrar Paciente') }}
                                 </button>
                             </a>
-                            
                         </div>
                         <!-- Tabla de pacientes -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);">
@@ -53,6 +52,11 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900 transition">Eliminar</button>
                                             </form>
+                                            <!-- Enlace para ver el historial médico -->
+                                            @if($paciente->citas->every(fn($cita) => $cita->consulta && $cita->consulta->estado == 'finalizada'))
+                                                <a href="{{ route('historialMedico.show', $paciente->id) }}" class="text-green-600 hover:text-green-900 transition">Ver Historial</a>
+                                                <a href="{{ route('historialMedico.pdf', $paciente->id) }}" class="text-green-600 hover:text-green-900 transition">Descargar PDF</a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
