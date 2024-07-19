@@ -26,6 +26,18 @@ class SecretariaController extends Controller
         return view('opciones.pacientes.historial_medico', compact('paciente'));
     }
     
+    public function buscarPaciente(Request $request)
+    {
+        $query = $request->input('q');
+        $pacientes = Paciente::where('nombres', 'like', "%{$query}%")
+            ->orWhere('apepat', 'like', "%{$query}%")
+            ->orWhere('apemat', 'like', "%{$query}%")
+            ->orWhere('correo', 'like', "%{$query}%")
+            ->get(['id', 'nombres', 'apepat', 'apemat', 'correo']);
+    
+        return response()->json($pacientes);
+    }
+    
     public function descargarHistorialMedicoPdf($id)
     {
         $paciente = Paciente::with(['citas.consulta.servicios', 'citas.consulta.productos'])->findOrFail($id);
@@ -43,10 +55,34 @@ class SecretariaController extends Controller
     // Muestra las citas pendientes por consultar
     public function porConsultar()
     {
-        // Obtiene las citas junto con la información del paciente, médico y consulta asociada
-        $citas = Citas::with(['paciente', 'medico', 'consulta'])->paginate(10);
+        if (auth()->user()->rol == 'admin') {
+            // Filtrar solo las citas con estado 'finalizada' para el rol 'admin'
+            $citas = Citas::with(['paciente', 'medico', 'consulta' => function($query) {
+                $query->where('estado', 'finalizada');
+            }])->paginate(10);
+        } elseif (auth()->user()->rol == 'medico') {
+            // Filtrar las citas que no tienen una consulta asociada o tienen estado 'eliminada'
+            $citas = Citas::with(['paciente', 'medico', 'consulta'])->whereDoesntHave('consulta')->orWhereHas('consulta', function($query) {
+                $query->where('estado', '!=', 'eliminada');
+            })->paginate(10);
+        } else {
+            // Otros roles (por si se agregan más roles en el futuro)
+            $citas = Citas::with(['paciente', 'medico', 'consulta'])->paginate(10);
+        }
+    
         return view('opciones.consultas.porConsultar', compact('citas'));
     }
+    
+
+    public function eliminarConsulta($id)
+    {
+        $consulta = Consultas::findOrFail($id);
+        $consulta->estado = 'eliminada';
+        $consulta->save();
+
+        return redirect()->route('consultas.porConsultar')->with('status', 'Consulta eliminada correctamente');
+    }
+
     
     // Muestra el formulario para una consulta específica
     public function showForm($id)
@@ -268,13 +304,33 @@ class SecretariaController extends Controller
         return redirect()->route($redirect_to)->with('status', 'Paciente registrado correctamente');
     }
 
-    // Muestra la lista de pacientes activos
-    public function mostrarPacientes()
+    public function mostrarPacientes(Request $request)
     {
-        $pacientes = Paciente::where('activo', 'si')->get();
+        $query = Paciente::query();
+    
+        if ($request->filled('nombre')) {
+            $nombre = $request->input('nombre');
+            $query->where(function ($query) use ($nombre) {
+                $query->where('nombres', 'like', "%{$nombre}%")
+                      ->orWhere('apepat', 'like', "%{$nombre}%")
+                      ->orWhere('apemat', 'like', "%{$nombre}%");
+            });
+        }
+    
+        if ($request->filled('fechanac')) {
+            $query->whereDate('fechanac', $request->input('fechanac'));
+        }
+    
+        if ($request->filled('correo')) {
+            $correo = $request->input('correo');
+            $query->where('correo', 'like', "%{$correo}%");
+        }
+    
+        $pacientes = $query->where('activo', 'si')->get();
         return view('/opciones.dashboardOpciones', compact('pacientes'));
     }
-
+    
+    
     // Muestra el formulario para editar un paciente
     public function editarPaciente($id)
     {
@@ -314,11 +370,19 @@ class SecretariaController extends Controller
     }
 
     // Muestra la lista de productos activos
-    public function mostrarProductos()
+    public function mostrarProductos(Request $request)
     {
-        $productos = Productos::where('activo', 'si')->get();
+        $query = Productos::query();
+    
+        if ($request->filled('nombre')) {
+            $nombre = $request->input('nombre');
+            $query->where('nombre', 'like', "%{$nombre}%");
+        }
+    
+        $productos = $query->where('activo', 'si')->get();
         return view('/opciones.productos.productos', compact('productos'));
     }
+    
 
     // Guarda un nuevo producto en la base de datos
     public function storeProductos(Request $request)
@@ -520,19 +584,6 @@ class SecretariaController extends Controller
         return redirect()->route($redirect_to)->with('status', 'Cita registrada correctamente');
     }
 
-    public function buscarPaciente(Request $request)
-    {
-        $query = $request->input('q');
-        $pacientes = Paciente::where('nombres', 'like', "%{$query}%")
-            ->orWhere('apepat', 'like', "%{$query}%")
-            ->orWhere('apemat', 'like', "%{$query}%")
-            ->orWhere('correo', 'like', "%{$query}%")
-            ->get(['id', 'nombres', 'apepat', 'apemat', 'correo']);
-    
-        return response()->json($pacientes);
-    }
-    
-
 
     // Muestra el formulario para agregar una nueva cita
     public function crearCita()
@@ -728,12 +779,19 @@ class SecretariaController extends Controller
     }
 
     // Muestra la lista de servicios activos
-    public function mostrarServicios()
+    public function mostrarServicios(Request $request)
     {
-        $servicios = Servicio::where('activo', 'si')->get();
+        $query = Servicio::query();
+    
+        if ($request->filled('nombre')) {
+            $nombre = $request->input('nombre');
+            $query->where('nombre', 'like', "%{$nombre}%");
+        }
+    
+        $servicios = $query->where('activo', 'si')->get();
         return view('/opciones.servicios.servicios', compact('servicios'));
     }
-
+    
     // Guarda un nuevo servicio en la base de datos
     public function storeServicios(Request $request)
     {

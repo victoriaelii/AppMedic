@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/opciones/pacientes/editar/{id}', [SecretariaController::class, 'editarPaciente'])->name('pacientes.editar');
     Route::patch('/opciones/pacientes/editar/{id}', [SecretariaController::class, 'updatePaciente'])->name('pacientes.update');
     Route::delete('/opciones/pacientes/eliminar/{id}', [SecretariaController::class, 'eliminarPaciente'])->name('pacientes.eliminar');
+    Route::get('/opciones/dashboardOpciones', [SecretariaController::class, 'mostrarPacientes'])->name('dashboardOpciones');
 
     // Rutas para la gestión de productos
     Route::get('/opciones/productos/agregar', [SecretariaController::class, 'crearProducto'])->name('productos.agregar');
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/opciones/productos/editar/{id}', [SecretariaController::class, 'editarProducto'])->name('productos.editar');
     Route::patch('/opciones/productos/editar/{id}', [SecretariaController::class, 'updateProducto'])->name('productos.update');
     Route::delete('/opciones/productos/eliminar/{id}', [SecretariaController::class, 'eliminarProducto'])->name('productos.eliminar');
+    Route::get('/opciones/productos', [SecretariaController::class, 'mostrarProductos'])->name('productos');
     Route::get('/opciones/productos', [SecretariaController::class, 'mostrarProductos'])->name('productos');
 
     // Rutas para la gestión de citas
@@ -61,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/opciones/servicios/editar/{id}', [SecretariaController::class, 'editarServicio'])->name('servicios.editar');
     Route::patch('/opciones/servicios/editar/{id}', [SecretariaController::class, 'updateServicio'])->name('servicios.update');
     Route::delete('/opciones/servicios/eliminar/{id}', [SecretariaController::class, 'eliminarServicio'])->name('servicios.eliminar');
+    Route::get('/opciones/servicios', [SecretariaController::class, 'mostrarServicios'])->name('servicios');
 
     // CONSULTAS
     Route::get('/opciones/consultas/porConsultar', [SecretariaController::class, 'porConsultar'])->name('consultas.porConsultar');
@@ -69,6 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/consultas/edit/{id}', [SecretariaController::class, 'editConsultas'])->name('consultas.edit');
     Route::patch('/consultas/update/{id}', [SecretariaController::class, 'updateConsultas'])->name('consultas.update');
     Route::patch('/consultas/terminar/{id}', [SecretariaController::class, 'terminarConsulta'])->name('consultas.terminar');
+    Route::patch('/consultas/eliminar/{id}', [SecretariaController::class, 'eliminarConsulta'])->name('consultas.eliminar');
 
 
 

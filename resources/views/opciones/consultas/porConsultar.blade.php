@@ -9,7 +9,7 @@
                     <div class="overflow-x-auto">
                         <!-- Encabezado de la sección -->
                         <div class="flex my-4 items-center justify-between">
-                            <h1 class="text-2xl font-semibold text-gray-800 uppercase">Por consultar</h1>
+                            <h1 class="text-2xl font-semibold text-gray-800 uppercase">Consultas</h1>
                         </div>
                         <!-- Tabla de citas -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);">
@@ -25,44 +25,63 @@
                             <tbody class="bg-white" style="background-color: rgba(255, 255, 255, 0.6);">
                                 <!-- Iterar sobre las citas y mostrar cada una en una fila -->
                                 @foreach($citas as $cita)
-                                    <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
-                                        <td class="px-6 py-4 text-left">{{ $cita->fecha }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $cita->hora }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $cita->paciente->nombres }} {{ $cita->paciente->apepat }} {{ $cita->paciente->apemat }}</td>
-                                        <td class="px-6 py-4 text-left">
-                                            @if($cita->consulta && $cita->consulta->estado == 'finalizada')
+                                    @if(auth()->user()->rol == 'admin' && $cita->consulta && $cita->consulta->estado == 'finalizada')
+                                        <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
+                                            <td class="px-6 py-4 text-left">{{ $cita->fecha }}</td>
+                                            <td class="px-6 py-4 text-left">{{ $cita->hora }}</td>
+                                            <td class="px-6 py-4 text-left">{{ $cita->paciente->nombres }} {{ $cita->paciente->apepat }} {{ $cita->paciente->apemat }}</td>
+                                            <td class="px-6 py-4 text-left">
                                                 ${{ number_format($cita->consulta->totalPagar, 2) }}
-                                            @else
-                                                <text class="bg-blue-100 text-blue-500 px-4 py-2 rounded-md">
-                                                {{ __('Pendiente') }}
-                                                  <!-- AQUI -->
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 text-left">
-                                            @if($cita->consulta && $cita->consulta->estado == 'finalizada')
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="green" class="size-6">
-                                                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
-                                                  </svg>
-                                            @else
-                                                @if($cita->consulta)
-                                                    <!-- Si la consulta ya existe, mostrar botones para editar y terminar según el rol del usuario -->
-                                                    @if(auth()->user()->rol != 'secretaria')
+                                            </td>
+                                            <td class="px-6 py-4 text-left flex items-center space-x-2">
+                                                <a href="{{ route('consultas.edit', $cita->consulta->id) }}">
+                                                    <button class="bg-blue-100 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-200 transition">
+                                                        {{ __('Editar') }}
+                                                    </button>
+                                                </a>
+                                                <form action="{{ route('consultas.eliminar', $cita->consulta->id) }}" method="POST" class="delete-form" style="display:inline;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="button" class="bg-red-100 text-red-500 px-4 py-2 rounded-md hover:bg-red-200 transition delete-btn">
+                                                        {{ __('Eliminar') }}
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @elseif(auth()->user()->rol == 'medico' && (!$cita->consulta || ($cita->consulta && $cita->consulta->estado != 'eliminada')))
+                                        <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
+                                            <td class="px-6 py-4 text-left">{{ $cita->fecha }}</td>
+                                            <td class="px-6 py-4 text-left">{{ $cita->hora }}</td>
+                                            <td class="px-6 py-4 text-left">{{ $cita->paciente->nombres }} {{ $cita->paciente->apepat }} {{ $cita->paciente->apemat }}</td>
+                                            <td class="px-6 py-4 text-left">
+                                                @if($cita->consulta && $cita->consulta->estado == 'finalizada')
+                                                    ${{ number_format($cita->consulta->totalPagar, 2) }}
+                                                @else
+                                                    {{ __('Pendiente') }}
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 text-left flex items-center space-x-2">
+                                                @if($cita->consulta && $cita->consulta->estado == 'finalizada')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="green" class="w-6 h-6">
+                                                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                                                    </svg>
+                                                @else
+                                                    @if($cita->consulta)
+                                                        <!-- Si la consulta ya existe, mostrar botones para editar y terminar -->
                                                         <a href="{{ route('consultas.edit', $cita->consulta->id) }}">
                                                             <button class="bg-blue-100 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-200 transition">
                                                                 {{ __('Editar') }}
                                                             </button>
                                                         </a>
-                                                    @endif
-                                                    <form action="{{ route('consultas.terminar', $cita->consulta->id) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="bg-red-100 text-red-500 px-4 py-2 rounded-md hover:bg-red-200 transition">
-                                                            {{ __('Terminar') }}
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <!-- Si no existe consulta, mostrar botón para crear una según el rol del usuario -->
-                                                    @if(auth()->user()->rol != 'secretaria')
+                                                        <form action="{{ route('consultas.terminar', $cita->consulta->id) }}" method="POST" style="display:inline;">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="bg-red-100 text-red-500 px-4 py-2 rounded-md hover:bg-red-200 transition">
+                                                                {{ __('Terminar') }}
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <!-- Si no existe consulta, mostrar botón para crear una -->
                                                         <a href="{{ route('consultas.form', $cita->id) }}">
                                                             <button class="bg-green-100 text-green-500 px-4 py-2 rounded-md hover:bg-green-200 transition">
                                                                 {{ __('Ir a consulta') }}
@@ -70,9 +89,9 @@
                                                         </a>
                                                     @endif
                                                 @endif
-                                            @endif
-                                        </td>
-                                    </tr>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
@@ -82,11 +101,41 @@
                         </div>
                         <!-- Mensaje si no hay citas -->
                         @if($citas->isEmpty())
-                            <p class="text-center text-gray-500 mt-4">No hay citas registradas.</p>
+                            <p class="text-center text-gray-500 mt-4">No hay consultas pendientes.</p>
                         @endif
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Incluir SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Script para manejar la confirmación de eliminación -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const form = this.closest('.delete-form');
+
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "No podrás revertir esto",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminarlo'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </x-app-layout>

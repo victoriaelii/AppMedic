@@ -9,15 +9,23 @@
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">
                         <!-- Encabezado de la sección -->
-                        <div class="flex my-4 items-center justify-between">
+                        <div class="flex items-center justify-between mb-4">
                             <h1 class="text-2xl font-semibold text-gray-800 uppercase">Lista de Productos</h1>
-                            <!-- Botón para agregar nuevo producto -->
+                                                        <!-- Botón para agregar nuevo producto -->
                             <a href="{{ route('productos.agregar') }}">
                                 <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
                                     {{ __('Agregar Producto') }}
                                 </button>
                             </a>
                         </div>
+                                                    <!-- Formulario de búsqueda -->
+                            <form method="GET" action="{{ route('productos') }}" class="flex mb-4  space-x-4">
+                                <input type="text" name="nombre" placeholder="Nombre del Producto" class="border border-gray-300 p-2 rounded-md" value="{{ request('nombre') }}">
+                                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Buscar</button>
+                                <a href="{{ route('productos') }}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">Limpiar</a>
+                            </form>
+
+                
                         <!-- Tabla de productos -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);">
                             <!-- Cabecera de la tabla -->
@@ -41,11 +49,13 @@
                                             <!-- Enlace para editar el producto -->
                                             <a href="{{ route('productos.editar', $producto->id) }}" class="text-blue-600 hover:text-blue-900 transition">Editar</a>
                                             <!-- Botón para eliminar el producto con SweetAlert -->
+                                            @if(Auth::user()->rol != 'secretaria')
                                             <form action="{{ route('productos.eliminar', $producto->id) }}" method="POST" class="inline-block form-eliminar">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900 transition eliminar-btn">Eliminar</button>
                                             </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
