@@ -40,10 +40,10 @@ class SecretariaController extends Controller
     
     public function descargarHistorialMedicoPdf($id)
     {
-        $paciente = Paciente::with(['citas.consulta.servicios', 'citas.consulta.productos'])->findOrFail($id);
-        
+        $paciente = Paciente::with('citas.consulta.servicios', 'citas.consulta.productos')->findOrFail($id);
+
         $pdf = PDF::loadView('opciones.pacientes.historial_medico_pdf', compact('paciente'));
-        return $pdf->download('historial_medico_'.$paciente->id.'.pdf');
+        return $pdf->download('historial_medico_' . $paciente->nombres . '.pdf');
     }
     
     // Muestra el formulario de consultas
@@ -283,6 +283,38 @@ class SecretariaController extends Controller
         return redirect()->route('consultas.porConsultar')->with('status', 'Consulta finalizada correctamente');
     }
 
+
+    // Método para generar código aleatorio
+    public function generarCodigo($id)
+    {
+        $paciente = Paciente::findOrFail($id);
+        $paciente->codigo = $this->generarCodigoAleatorio();
+        $paciente->save();
+
+        return redirect()->back()->with('success', 'Código generado exitosamente');
+    }
+
+    // Método privado para generar código aleatorio
+    private function generarCodigoAleatorio()
+    {
+        return substr(str_shuffle('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 8);
+    }
+
+    // Método para verificar el código y mostrar el historial médico
+    public function verificarCodigo(Request $request)
+    {
+        $request->validate([
+            'codigo' => 'required|string|size:8',
+        ]);
+
+        $paciente = Paciente::where('codigo', $request->codigo)->first();
+
+        if ($paciente && $paciente->citas->contains(fn($cita) => $cita->consulta && $cita->consulta->estado == 'finalizada')) {
+            return view('opciones.pacientes.historial_medico', compact('paciente'));
+        }
+
+        return redirect()->back()->with('error', 'Código inválido o sin citas finalizadas.');
+    }
     // Guarda un nuevo paciente en la base de datos
     public function storePacientes(Request $request)
     {
@@ -706,7 +738,7 @@ class SecretariaController extends Controller
         ]);
 
         if ($request->rol === 'medico' && User::where('rol', 'medico')->exists()) {
-            return redirect()->back()->withInput()->with('error', 'No se pueden registrar más de un doctor');
+            return redirect()->back()->withInput()->with('error', 'Solo se acepta un único médico en el sistema');
         }
 
         // Crea el médico con los datos del formulario

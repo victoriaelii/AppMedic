@@ -63,6 +63,13 @@
             padding-top: 4rem;
             padding-bottom: 4rem;
         }
+        .input-code {
+            background-color: #1f2937;
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+        }
     </style>
     <!-- SEO Meta Tags -->
     <meta name="description" content="HealthCenter: Cuidando de tu salud con profesionalismo y dedicación. Conoce a nuestro equipo y servicios.">
@@ -86,6 +93,12 @@
                         <a href="{{ route('login') }}" class="button">
                             Iniciar sesión
                         </a>
+                        <!-- Campo para ingresar el código -->
+                        <form action="{{ route('verificarCodigo') }}" method="POST" class="flex space-x-2">
+                            @csrf
+                            <input type="text" name="codigo" placeholder="Ingresa tu código" class="input-code" required>
+                            <button type="submit" class="button">Verificar</button>
+                        </form>
                     @endauth
                 @endif
             </div>

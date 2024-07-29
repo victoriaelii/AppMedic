@@ -43,7 +43,7 @@
                                 @foreach($productos as $producto)
                                     <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
                                         <td class="px-6 py-4 text-left">{{ $producto->nombre }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $producto->precio }}</td>
+                                        <td class="px-6 py-4 text-left">${{number_format($producto->precio, 2)}}</td>
                                         <td class="px-6 py-4 text-left">{{ $producto->cantidad }}</td>
                                         <td class="px-6 py-4 text-left flex items-center space-x-2">
                                             <!-- Enlace para editar el producto -->

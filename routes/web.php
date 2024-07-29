@@ -10,12 +10,20 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::post('/verificar-codigo', [SecretariaController::class, 'verificarCodigo'])->name('verificarCodigo');
+// Ruta para descargar el historial médico en PDF
+Route::get('/historial-medico/{id}/pdf', [SecretariaController::class, 'descargarHistorialMedicoPdf'])->name('historialMedico.pdf');
+
 // Grupo de rutas que requieren autenticación y verificación de email
 Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas para la gestión del perfil del usuario
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+    Route::post('/pacientes/{paciente}/generar-codigo', [SecretariaController::class, 'generarCodigo'])->name('pacientes.generarCodigo');
+
 
     // Rutas para la gestión de pacientes
     Route::post('/pacientes/store', [SecretariaController::class, 'storePacientes'])->name('pacientes.store');
@@ -78,8 +86,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Ruta para mostrar el historial médico
     Route::get('/historial-medico/{id}', [SecretariaController::class, 'mostrarHistorialMedico'])->name('historialMedico.show');
-    // Ruta para descargar el historial médico en PDF
-    Route::get('/historial-medico/{id}/pdf', [SecretariaController::class, 'descargarHistorialMedicoPdf'])->name('historialMedico.pdf');
 
 });
 

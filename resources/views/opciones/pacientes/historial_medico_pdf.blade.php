@@ -51,13 +51,20 @@
                 <h2>Fecha: {{ $cita->fecha }}</h2>
                 <p><strong>Diagnóstico:</strong> {{ $cita->consulta->diagnostico }}</p>
                 <p><strong>Receta:</strong> {{ $cita->consulta->recete }}</p>
+                <p><strong>Signos Vitales:</strong> {{ $cita->consulta->signos_vitales }}</p>
+                <p><strong>Motivo de Consulta:</strong> {{ $cita->consulta->motivo_consulta }}</p>
+                <p><strong>Notas del Padecimiento:</strong> {{ $cita->consulta->notas_padecimiento }}</p>
+                <p><strong>Examen Físico:</strong> {{ $cita->consulta->examen_fisico }}</p>
+                <p><strong>Pronóstico:</strong> {{ $cita->consulta->pronostico }}</p>
+                <p><strong>Plan de Tratamiento:</strong> {{ $cita->consulta->plan }}</p>
+                <p><strong>Alergias:</strong> {{ $cita->consulta->alergias }}</p>
                 <p><strong>Servicios:</strong></p>
                 @foreach($cita->consulta->servicios as $servicio)
-                    <p>{{ $servicio->nombre }}</p>
+                    <p>{{ $servicio->nombre }} - ${{ number_format($servicio->precio, 2) }}</p>
                 @endforeach
                 <p><strong>Productos:</strong></p>
                 @foreach($cita->consulta->productos as $producto)
-                    <p>{{ $producto->nombre }} ({{ $producto->pivot->cantidad }})</p>
+                    <p>{{ $producto->nombre }} ({{ $producto->pivot->cantidad }}) - ${{ number_format($producto->precio, 2) }} c/u, Total: ${{ number_format($producto->precio * $producto->pivot->cantidad, 2) }}</p>
                 @endforeach
                 <p><strong>Total a Pagar:</strong> ${{ number_format($cita->consulta->totalPagar, 2) }}</p>
             </div>

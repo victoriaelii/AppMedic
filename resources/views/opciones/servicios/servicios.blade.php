@@ -40,7 +40,7 @@
                                 @foreach($servicios as $servicio)
                                     <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
                                         <td class="px-6 py-4 text-left">{{ $servicio->nombre }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $servicio->precio }}</td>
+                                        <td class="px-6 py-4 text-left">${{ number_format($servicio->precio, 2)}}</td>
                                         <td class="px-6 py-4 text-left flex items-center space-x-2">
                                             <!-- Enlace para editar el servicio -->
                                             <a href="{{ route('servicios.editar', $servicio->id) }}" class="text-blue-600 hover:text-blue-900 transition">Editar</a>
