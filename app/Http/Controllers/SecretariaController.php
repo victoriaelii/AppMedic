@@ -173,61 +173,141 @@ class SecretariaController extends Controller
             return response()->json(['status' => true, 'detalleCostos' => $detalleCostos, 'totalPagar' => $totalPagar]);
         } catch (\Exception $e) {
             \Log::error('Error al guardar la consulta: ' . $e->getMessage());
-            return response()->json(['status' => false, 'error' => $e->getMessage()]);
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
         }
     }
     
 
     public function editConsultas($id)
     {
-        $consulta = Consultas::with('productos')->findOrFail($id);
+        $consulta = Consultas::findOrFail($id);
+        $receteItems = $this->parseReceta($consulta->recete);
+        $signosVitales = $this->parseSignosVitales($consulta->signos_vitales);
         $servicios = Servicio::where('activo', 'si')->get();
         $productos = Productos::where('activo', 'si')->get();
-        $enfermeras = User::where('rol', 'enfermera')->get(); // Obtener lista de enfermeras activas
-        return view('opciones.consultas.editConsulta', compact('consulta', 'servicios', 'productos', 'enfermeras'));
+        $enfermeras = User::where('rol', 'enfermera')->get();
+        return view('opciones.consultas.editConsulta', compact('consulta', 'receteItems', 'signosVitales', 'servicios', 'productos', 'enfermeras'));
     }
+    
+
+    private function parseReceta($recete)
+    {
+        if (empty($recete)) {
+            return [];
+        }
+    
+        $items = explode(' | ', $recete);
+        $parsedItems = [];
+    
+        foreach ($items as $item) {
+            if (strpos($item, 'Notas:') === false) {
+                $itemParts = explode(', ', $item);
+                $parsedItems[] = [
+                    'medicacion' => isset($itemParts[0]) ? str_replace('Medicación: ', '', $itemParts[0]) : '',
+                    'cantidad' => isset($itemParts[1]) ? str_replace('Cantidad: ', '', $itemParts[1]) : '',
+                    'frecuencia' => isset($itemParts[2]) ? str_replace('Frecuencia: ', '', $itemParts[2]) : '',
+                    'duracion' => isset($itemParts[3]) ? str_replace('Duración: ', '', $itemParts[3]) : '',
+                ];
+            } else {
+                $parsedItems['notas'] = str_replace('Notas: ', '', $item);
+            }
+        }
+    
+        return $parsedItems;
+    }
+    
+
+    private function parseSignosVitales($signosVitales)
+    {
+        if (empty($signosVitales)) {
+            return [];
+        }
+    
+        // Decodificar caracteres especiales
+        $signosVitales = html_entity_decode($signosVitales, ENT_QUOTES, 'UTF-8');
+    
+        $signosArray = explode(', ', $signosVitales);
+        $parsedSignos = [];
+    
+        foreach ($signosArray as $signo) {
+            $signoParts = explode(': ', $signo);
+            if (count($signoParts) == 2) {
+                // Extracción del valor numérico
+                $key = strtolower(str_replace([' ', 'ó', 'á'], ['_', 'o', 'a'], $signoParts[0]));
+                $value = preg_replace('/[^0-9.]/', '', trim($signoParts[1]));
+                $parsedSignos[$key] = $value;
+            }
+        }
+    
+        return $parsedSignos;
+    }
+    
+    
+    
     
     public function updateConsultas(Request $request, $id)
     {
         try {
-            // Valida los datos del formulario
-            $request->validate([
-                'diagnostico' => 'required|string',
-                'recete' => 'required|string',
-                'signos_vitales' => 'nullable|string',
-                'motivo_consulta' => 'nullable|string',
-                'notas_padecimiento' => 'nullable|string',
-                'examen_fisico' => 'nullable|string',
-                'pronostico' => 'nullable|string',
-                'plan' => 'nullable|string',
-                'alergias' => 'nullable|string',
-                'servicios' => 'nullable|array',
-                'productos' => 'nullable|array',
-                'enfermera_id' => 'nullable|exists:users,id',
-            ]);
-    
-            // Encuentra la consulta y la actualiza con los nuevos datos
+            // Busca la consulta existente
             $consulta = Consultas::findOrFail($id);
+    
+            // Construir el nuevo campo de 'recete' con los datos enviados en la solicitud
+            $receteItems = [];
+            if ($request->has('medicacion')) {
+                foreach ($request->input('medicacion') as $index => $medicacion) {
+                    $cantidad = $request->input('cantidad')[$index];
+                    $frecuencia = $request->input('frecuencia')[$index];
+                    $duracion = $request->input('duracion')[$index];
+                    $receteItems[] = "Medicación: $medicacion, Cantidad: $cantidad, Frecuencia: $frecuencia, Duración: $duracion";
+                }
+            }
+    
+            // Agregar notas si están presentes
+            if ($request->has('notas_receta')) {
+                $receteItems[] = "Notas: " . $request->input('notas_receta');
+            }
+    
+            // Convertir el array de recete en un string separado por ' | '
+            $recete = implode(' | ', $receteItems);
+    
+            // Guardar signos vitales en el formato correcto
+            $signosVitales = [
+                'Talla' => $request->input('talla'),
+                'Temperatura' => $request->input('temperatura'),
+                'Saturacion' => $request->input('saturacion'),
+                'Frecuencia cardiaca' => $request->input('frecuencia_cardiaca'),
+                'Peso' => $request->input('peso'),
+                'Tension arterial' => $request->input('tension_arterial'),
+            ];
+    
+            // Convertir los signos vitales a una cadena de texto
+            $signosVitalesString = collect($signosVitales)
+                ->map(function ($value, $key) {
+                    return "{$key}: {$value}";
+                })
+                ->implode(', ');
+    
+            // Actualizar los campos de la consulta
             $consulta->update([
-                'diagnostico' => $request->diagnostico,
-                'recete' => $request->recete,
-                'signos_vitales' => $request->signos_vitales,
-                'motivo_consulta' => $request->motivo_consulta,
-                'notas_padecimiento' => $request->notas_padecimiento,
-                'examen_fisico' => $request->examen_fisico,
-                'pronostico' => $request->pronostico,
-                'plan' => $request->plan,
-                'alergias' => $request->alergias,
-                'enfermera_id' => $request->enfermera_id, // Actualizar enfermera_id
+                'diagnostico' => $request->input('diagnostico', $consulta->diagnostico),
+                'recete' => $recete,
+                'signos_vitales' => $signosVitalesString,
+                'motivo_consulta' => $request->input('motivo_consulta', $consulta->motivo_consulta),
+                'notas_padecimiento' => $request->input('notas_padecimiento', $consulta->notas_padecimiento),
+                'examen_fisico' => $request->input('examen_fisico', $consulta->examen_fisico),
+                'pronostico' => $request->input('pronostico', $consulta->pronostico),
+                'plan' => $request->input('plan', $consulta->plan),
+                'alergias' => $request->input('alergias', $consulta->alergias),
+                'enfermera_id' => $request->input('enfermera_id', $consulta->enfermera_id),
             ]);
     
-            $totalPagar = 100; // Precio base de la consulta
+            // Calcular el costo total y actualizar los servicios y productos
+            $totalPagar = 100; // Precio base
             $detalleCostos = [];
     
-            // Sincroniza los servicios seleccionados para el prellenado
             if ($request->has('servicios')) {
-                $consulta->servicios()->sync($request->servicios);
-                $servicios = Servicio::whereIn('id', $request->servicios)->get();
+                $consulta->servicios()->sync($request->input('servicios', []));
+                $servicios = Servicio::whereIn('id', $request->input('servicios', []))->get();
                 foreach ($servicios as $servicio) {
                     $totalPagar += $servicio->precio;
                     $detalleCostos[] = ['nombre' => $servicio->nombre, 'precio' => $servicio->precio];
@@ -236,43 +316,39 @@ class SecretariaController extends Controller
                 $consulta->servicios()->sync([]);
             }
     
-            // Sincroniza los productos seleccionados
-            $productosActuales = $consulta->productos->keyBy('id');
-            $consulta->productos()->detach();
-    
             if ($request->has('productos')) {
-                foreach ($request->productos as $productoData) {
+                $productosSync = [];
+                foreach ($request->input('productos', []) as $productoData) {
                     if (isset($productoData['id']) && isset($productoData['cantidad']) && $productoData['cantidad'] > 0) {
                         $producto = Productos::findOrFail($productoData['id']);
-                        $cantidadNueva = $productoData['cantidad'];
-                        $cantidadAnterior = $productosActuales[$productoData['id']]->pivot->cantidad ?? 0;
-                        $diferencia = $cantidadNueva - $cantidadAnterior;
+                        $cantidad = $productoData['cantidad'];
+                        $productosSync[$producto->id] = ['cantidad' => $cantidad];
+                        $totalPagar += $producto->precio * $cantidad;
+                        $detalleCostos[] = ['nombre' => $producto->nombre, 'precio' => $producto->precio * $cantidad, 'cantidad' => $cantidad];
     
-                        $consulta->productos()->attach($producto->id, ['cantidad' => $cantidadNueva]);
-                        $totalPagar += $producto->precio * $cantidadNueva;
-                        $detalleCostos[] = ['nombre' => $producto->nombre, 'precio' => $producto->precio * $cantidadNueva, 'cantidad' => $cantidadNueva];
-    
-                        // Actualiza la cantidad del producto en el inventario
-                        $producto->cantidad -= $diferencia;
-                        if ($producto->cantidad < 5) {
-                            $producto->abastecer = true;
-                            session()->flash('alert', 'El producto ' . $producto->nombre . ' necesita ser abastecido.');
-                        }
+                        // Actualizar la cantidad del producto
+                        $producto->cantidad -= $cantidad;
                         $producto->save();
                     }
                 }
+                $consulta->productos()->sync($productosSync);
+            } else {
+                $consulta->productos()->sync([]);
             }
     
-            // Actualiza el total a pagar en la consulta
+            // Actualizar el total a pagar en la consulta
             $consulta->update(['totalPagar' => $totalPagar]);
     
-            // Redirige a la página de consultas pendientes con un mensaje de éxito
-            return redirect()->route('consultas.porConsultar')->with('status', 'Consulta actualizada correctamente');
+            // Respuesta de éxito
+            return response()->json(['status' => true, 'detalleCostos' => $detalleCostos, 'totalPagar' => $totalPagar]);
         } catch (\Exception $e) {
-            \Log::error('Error al actualizar la consulta: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al actualizar la consulta');
+            // Registrar el error para depuración
+            \Log::error('Error en updateConsultas: ' . $e->getMessage());
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
         }
     }
+    
+    
     
     // terminar la consulta 
     public function terminarConsulta($id)
