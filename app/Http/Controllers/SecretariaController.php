@@ -53,25 +53,45 @@ class SecretariaController extends Controller
     }
 
     // Muestra las citas pendientes por consultar
-    public function porConsultar()
+    public function porConsultar(Request $request)
     {
-        if (auth()->user()->rol == 'admin') {
-            // Filtrar solo las citas con estado 'finalizada' para el rol 'admin'
-            $citas = Citas::with(['paciente', 'medico', 'consulta' => function($query) {
-                $query->where('estado', 'finalizada');
-            }])->paginate(10);
-        } elseif (auth()->user()->rol == 'medico') {
-            // Filtrar las citas que no tienen una consulta asociada o tienen estado 'eliminada'
-            $citas = Citas::with(['paciente', 'medico', 'consulta'])->whereDoesntHave('consulta')->orWhereHas('consulta', function($query) {
-                $query->where('estado', '!=', 'eliminada');
-            })->paginate(10);
-        } else {
-            // Otros roles (por si se agregan más roles en el futuro)
-            $citas = Citas::with(['paciente', 'medico', 'consulta'])->paginate(10);
+        $query = Citas::with(['paciente', 'medico', 'consulta']);
+    
+        // Filtrar por nombre, apellidos o correo del paciente
+        if ($request->filled('nombre')) {
+            $nombreCompleto = $request->input('nombre');
+            $nombrePartes = explode(' ', $nombreCompleto);
+    
+            $query->whereHas('paciente', function($q) use ($nombrePartes) {
+                foreach ($nombrePartes as $parte) {
+                    $q->where(function($query) use ($parte) {
+                        $query->where('nombres', 'like', '%' . $parte . '%')
+                              ->orWhere('apepat', 'like', '%' . $parte . '%')
+                              ->orWhere('apemat', 'like', '%' . $parte . '%');
+                    });
+                }
+            });
         }
+    
+        // Filtrar por estado de la consulta
+        if ($request->filled('estado')) {
+            $query->whereHas('consulta', function($q) use ($request) {
+                $q->where('estado', $request->input('estado'));
+            });
+        }
+    
+        // Filtrar por rol del usuario
+        if (auth()->user()->rol == 'admin') {
+            $query->whereHas('consulta', function($q) {
+                $q->where('estado', 'finalizada');
+            });
+        }
+    
+        $citas = $query->paginate(10);
     
         return view('opciones.consultas.porConsultar', compact('citas'));
     }
+    
     
 
     public function eliminarConsulta($id)
@@ -90,7 +110,7 @@ class SecretariaController extends Controller
         $cita = Citas::findOrFail($id);
         $servicios = Servicio::where('activo', 'si')->get();
         $productos = Productos::where('activo', 'si')->get();
-        $enfermeras = User::where('rol', 'enfermera')->get(); // Obtener lista de enfermeras activas
+        $enfermeras = User::where('rol', 'enfermera')->get(); // enfermeras ACTIVAS
         return view('opciones.consultas.consultasform', compact('cita', 'servicios', 'productos', 'enfermeras'));
     }
 
@@ -100,6 +120,7 @@ class SecretariaController extends Controller
         try {
             // Valida los datos del formulario
             $request->validate([
+                'cita_id' => 'required|exists:citas,id',
                 'diagnostico' => 'required|string',
                 'recete' => 'required|string',
                 'signos_vitales' => 'nullable|string',
@@ -113,6 +134,12 @@ class SecretariaController extends Controller
                 'productos' => 'nullable|array',
                 'enfermera_id' => 'nullable|exists:users,id',
             ]);
+    
+            // Verifica si la cita ya tiene una consulta asociada
+            $cita = Citas::findOrFail($request->cita_id);
+            if ($cita->consulta) {
+                return response()->json(['status' => false, 'error' => 'Esta cita ya tiene una consulta asociada.'], 400);
+            }
     
             // Crea la consulta con los datos del formulario
             $consulta = Consultas::create([
@@ -128,7 +155,7 @@ class SecretariaController extends Controller
                 'alergias' => $request->alergias,
                 'totalPagar' => 100, 
                 'usuariomedicoid' => auth()->user()->id,
-                'enfermera_id' => $request->enfermera_id, // Agregar enfermera_id
+                'enfermera_id' => $request->enfermera_id, 
             ]);
     
             $totalPagar = 100; // Precio base de la consulta
@@ -158,7 +185,7 @@ class SecretariaController extends Controller
                         $producto->cantidad -= $cantidad;
                         if ($producto->cantidad < 5) {
                             $producto->abastecer = true;
-                            //  alerta de abastecimiento
+                            // abastecer
                             session()->flash('alert', 'El producto ' . $producto->nombre . ' necesita ser abastecido.');
                         }
                         $producto->save();
@@ -169,13 +196,13 @@ class SecretariaController extends Controller
             // Actualiza el total a pagar en la consulta
             $consulta->update(['totalPagar' => $totalPagar]);
     
-            // Retorna una respuesta JSON con el estado, los detalles de costos y el total a pagar
             return response()->json(['status' => true, 'detalleCostos' => $detalleCostos, 'totalPagar' => $totalPagar]);
         } catch (\Exception $e) {
             \Log::error('Error al guardar la consulta: ' . $e->getMessage());
             return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
         }
     }
+    
     
 
     public function editConsultas($id)
@@ -192,6 +219,7 @@ class SecretariaController extends Controller
 
     private function parseReceta($recete)
     {
+        // si esta vacio se manda el array vacio
         if (empty($recete)) {
             return [];
         }
@@ -200,8 +228,10 @@ class SecretariaController extends Controller
         $parsedItems = [];
     
         foreach ($items as $item) {
+             // Si la parte no contiene notas de RECETA, se toma commoun ítem de medicación.
             if (strpos($item, 'Notas:') === false) {
                 $itemParts = explode(', ', $item);
+                // rray asosiativo para guardar los detalles de receta
                 $parsedItems[] = [
                     'medicacion' => isset($itemParts[0]) ? str_replace('Medicación: ', '', $itemParts[0]) : '',
                     'cantidad' => isset($itemParts[1]) ? str_replace('Cantidad: ', '', $itemParts[1]) : '',
@@ -209,10 +239,11 @@ class SecretariaController extends Controller
                     'duracion' => isset($itemParts[3]) ? str_replace('Duración: ', '', $itemParts[3]) : '',
                 ];
             } else {
+                // si tinee notas se guarda cmo adicional en la recera MISMO CAMPO
                 $parsedItems['notas'] = str_replace('Notas: ', '', $item);
             }
         }
-    
+    // SE MAND EL ARRAY
         return $parsedItems;
     }
     
@@ -223,7 +254,7 @@ class SecretariaController extends Controller
             return [];
         }
     
-        // Decodificar caracteres especiales
+        // Decodifica caracteres especiales
         $signosVitales = html_entity_decode($signosVitales, ENT_QUOTES, 'UTF-8');
     
         $signosArray = explode(', ', $signosVitales);
@@ -407,7 +438,7 @@ class SecretariaController extends Controller
         // Crea el paciente con los datos del formulario
         Paciente::create($request->all());
 
-        // Redirige a la vista de opciones de pacientes con un mensaje de éxito
+        // Redirige a la vista de opciones de pacientes
         $redirect_to = $request->input('redirect_to', 'dashboardOpciones');
         return redirect()->route($redirect_to)->with('status', 'Paciente registrado correctamente');
     }
@@ -417,11 +448,17 @@ class SecretariaController extends Controller
         $query = Paciente::query();
     
         if ($request->filled('nombre')) {
-            $nombre = $request->input('nombre');
-            $query->where(function ($query) use ($nombre) {
-                $query->where('nombres', 'like', "%{$nombre}%")
-                      ->orWhere('apepat', 'like', "%{$nombre}%")
-                      ->orWhere('apemat', 'like', "%{$nombre}%");
+            $nombreCompleto = $request->input('nombre');
+            $nombrePartes = explode(' ', $nombreCompleto);
+    
+            $query->where(function ($query) use ($nombrePartes) {
+                foreach ($nombrePartes as $parte) {
+                    $query->where(function ($query) use ($parte) {
+                        $query->where('nombres', 'like', '%' . $parte . '%')
+                              ->orWhere('apepat', 'like', '%' . $parte . '%')
+                              ->orWhere('apemat', 'like', '%' . $parte . '%');
+                    });
+                }
             });
         }
     
@@ -435,6 +472,7 @@ class SecretariaController extends Controller
         }
     
         $pacientes = $query->where('activo', 'si')->get();
+    
         return view('/opciones.dashboardOpciones', compact('pacientes'));
     }
     
@@ -467,7 +505,7 @@ class SecretariaController extends Controller
         return redirect()->route('dashboardOpciones')->with('status', 'Paciente actualizado correctamente');
     }
 
-    // Elimina (desactiva) un paciente en la base de datos
+    // Elimina (desactiva (0)) un paciente en la base de datos
     public function eliminarPaciente($id)
     {
         $paciente = Paciente::findOrFail($id);
@@ -482,14 +520,22 @@ class SecretariaController extends Controller
     {
         $query = Productos::query();
     
+        // Filtro por nombre
         if ($request->filled('nombre')) {
-            $nombre = $request->input('nombre');
-            $query->where('nombre', 'like', "%{$nombre}%");
+            $query->where('nombre', 'like', '%' . $request->input('nombre') . '%');
+        }
+    
+        // Filtro por precio
+        if ($request->filled('precio')) {
+            $query->where('precio', $request->input('precio'));
         }
     
         $productos = $query->where('activo', 'si')->get();
-        return view('/opciones.productos.productos', compact('productos'));
+    
+        return view('opciones.productos.productos', compact('productos'));
     }
+    
+    
     
 
     // Guarda un nuevo producto en la base de datos
@@ -504,7 +550,7 @@ class SecretariaController extends Controller
         // Crea el producto con los datos del formulario
         Productos::create($request->all());
 
-        // Redirige a la vista de opciones de productos con un mensaje de éxito
+        // Redirige a la vista de opciones de productos
         return redirect()->route('productos')->with('status', 'Producto registrado correctamente');
     }
 
@@ -530,7 +576,7 @@ class SecretariaController extends Controller
             'precio' => 'required|numeric|min:0',
         ]);
 
-        // Encuentra el producto y lo actualiza con los nuevos datos
+        // Encuentra el producto y lo actualiza 
         $producto = Productos::findOrFail($id);
         $producto->update($request->all());
 
@@ -538,17 +584,16 @@ class SecretariaController extends Controller
         return redirect()->route('productos')->with('status', 'Producto actualizado correctamente');
     }
 
-    // Elimina (desactiva) un producto en la base de datos
+    // Elimina (desactiva) un producto en la BD
     public function eliminarProducto($id)
     {
         $producto = Productos::findOrFail($id);
         $producto->update(['activo' => 'no']);
 
-        // Redirige a la vista de opciones de productos con un mensaje de éxito
+        // Redirige a la vista de opciones de productos
         return redirect()->route('productos')->with('status', 'Producto eliminado correctamente');
     }
 
-    // Muestra la tabla de citas
     // Método para desactivar citas que tienen consulta asociada
     private function desactivarCitasConConsulta()
     {
@@ -789,14 +834,46 @@ class SecretariaController extends Controller
         return response()->json($eventos);
     }
 
-    // Muestra la lista de médicos activos
-    public function mostrarMedicos()
+    //MMOSTRAR LOS USUARIOS EN LA VISTA ADMIN
+    public function mostrarMedicos(Request $request)
     {
-        $medicos = User::whereIn('rol', ['medico', 'secretaria', 'enfermera'])
+        $query = User::query();
+        
+        // Filtrar por nombre, apellido paterno o apellido materno
+        if ($request->filled('nombre')) {
+            $nombre = $request->input('nombre');
+            $query->where(function ($query) use ($nombre) {
+                // Dividimos el nombre por espacios y filtramos cada parte por separado
+                $searchTerms = explode(' ', $nombre);
+                foreach ($searchTerms as $term) {
+                    $query->where('nombres', 'like', "%{$term}%")
+                          ->orWhere('apepat', 'like', "%{$term}%")
+                          ->orWhere('apemat', 'like', "%{$term}%");
+                }
+            });
+        }
+        
+        // Filtrar por correo
+        if ($request->filled('correo')) {
+            $correo = $request->input('correo');
+            $query->where('email', 'like', "%{$correo}%");
+        }
+        
+        // Filtrar por rol
+        if ($request->filled('rol')) {
+            $rol = $request->input('rol');
+            $query->where('rol', $rol);
+        }
+        
+        // Obtener los médicos, secretarias o enfermeras activas según los filtros aplicados
+        $medicos = $query->whereIn('rol', ['medico', 'secretaria', 'enfermera'])
                         ->where('activo', 'si')
                         ->get();
+        
+        // Devolver la vista con los datos filtrados
         return view('/opciones.medicos.medicos', compact('medicos'));
     }
+    
 
     // Guarda un nuevo médico en la base de datos
     public function storeMedicos(Request $request)
@@ -889,11 +966,19 @@ class SecretariaController extends Controller
     // Muestra la lista de servicios activos
     public function mostrarServicios(Request $request)
     {
+        $request->validate([
+            'precio' => 'nullable|numeric|min:0',
+        ]);
+        
         $query = Servicio::query();
     
         if ($request->filled('nombre')) {
             $nombre = $request->input('nombre');
             $query->where('nombre', 'like', "%{$nombre}%");
+        }
+
+        if ($request->filled('precio')) {
+            $query->where('precio', $request->precio);
         }
     
         $servicios = $query->where('activo', 'si')->get();

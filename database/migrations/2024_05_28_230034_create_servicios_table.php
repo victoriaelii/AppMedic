@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Crear la tabla 'servicios' para almacenar los servicios ofrecidos.
+        // Crea la tabla 'servicios' para almacenar los servicios ofrecidos.
         Schema::create('servicios', function (Blueprint $table) {
             $table->id(); // Columna para el ID único del servicio.
             $table->string('nombre', 100); // Columna para el nombre del servicio.
