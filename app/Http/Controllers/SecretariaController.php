@@ -59,7 +59,6 @@ class SecretariaController extends Controller
         return view('opciones.consultas.consultasform');
     }
 
-    // Muestra las citas pendientes por consultar
     public function porConsultar(Request $request)
     {
         $query = Citas::with(['paciente', 'medico', 'consulta.servicios', 'consulta.productos', 'consulta.enfermera'])
@@ -72,12 +71,12 @@ class SecretariaController extends Controller
                                     // No es necesario agregar condiciones aquí
                                 });
                     });
-
+    
         // Filtrar por nombre, apellidos o correo del paciente
         if ($request->filled('nombre')) {
             $nombreCompleto = $request->input('nombre');
             $nombrePartes = explode(' ', $nombreCompleto);
-
+    
             $query->whereHas('paciente', function($q) use ($nombrePartes) {
                 foreach ($nombrePartes as $parte) {
                     $q->where(function($query) use ($parte) {
@@ -88,26 +87,31 @@ class SecretariaController extends Controller
                 }
             });
         }
-
+    
         // Filtrar por estado de la consulta
         if ($request->filled('estado')) {
             $query->whereHas('consulta', function($q) use ($request) {
                 $q->where('estado', $request->input('estado'));
             });
         }
-
+    
+        // Filtrar por fecha
+        if ($request->filled('fecha')) {
+            $query->whereDate('fecha', $request->input('fecha'));
+        }
+    
         // Filtrar por rol del usuario
         if (auth()->user()->rol == 'admin') {
             $query->whereHas('consulta', function($q) {
                 $q->where('estado', 'finalizada');
             });
         }
-
+    
         $citas = $query->paginate(10);
-
+    
         return view('opciones.consultas.porConsultar', compact('citas'));
     }
-
+    
     
     
 
@@ -440,7 +444,8 @@ class SecretariaController extends Controller
             }
     
             if ($paciente->citas->contains(fn($cita) => $cita->consulta && $cita->consulta->estado == 'finalizada')) {
-                return response()->json(['redirect_url' => url('opciones/pacientes/historial_medico')]);
+                // Redirige a la ruta del historial médico con el ID del paciente
+                return response()->json(['redirect_url' => route('historialMedico.show', ['id' => $paciente->id])]);
             }
         }
     

@@ -13,6 +13,9 @@ Route::get('/', function () {
 Route::post('/verificar-codigo', [SecretariaController::class, 'verificarCodigo'])->name('verificarCodigo');
 // Ruta para descargar el historial médico en PDF
 Route::get('/historial-medico/{id}/pdf', [SecretariaController::class, 'descargarHistorialMedicoPdf'])->name('historialMedico.pdf');
+    // Ruta para mostrar el historial médico
+Route::get('/historial-medico/{id}', [SecretariaController::class, 'mostrarHistorialMedico'])->name('historialMedico.show');
+
 
 // Grupo de rutas que requieren autenticación y verificación de email
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -82,9 +85,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/consultas/eliminar/{id}', [SecretariaController::class, 'eliminarConsulta'])->name('consultas.eliminarConsulta');
 
 
-
-    // Ruta para mostrar el historial médico
-    Route::get('/historial-medico/{id}', [SecretariaController::class, 'mostrarHistorialMedico'])->name('historialMedico.show');
 
 });
 

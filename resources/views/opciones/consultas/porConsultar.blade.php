@@ -24,6 +24,10 @@
                                         <option value="finalizada" {{ request('estado') == 'finalizada' ? 'selected' : '' }}>Finalizada</option>
                                     </select>
                                 </div>
+                                        <!-- Campo de fecha -->
+                                <div>
+                                    <input type="date" name="fecha" value="{{ request('fecha') }}" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                </div>
                                 <div class="flex space-x-2">
                                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Buscar</button>
                                     <a href="{{ route('consultas.porConsultar') }}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition">Limpiar</a>
@@ -75,9 +79,12 @@
                                                             </svg>
                                                         </a>
                                                                                                                 <!-- Botón 'Ver' -->
-                                                        <button type="button" class="bg-green-100 text-green-500 px-4 py-2 rounded-md hover:bg-green-200 transition ver-detalles-btn" data-consulta="{{ $cita->consulta }}">
-                                                            Ver
-                                                        </button>
+                                                                                                                <button type="button" class="   ver-detalles-btn" data-consulta="{{ $cita->consulta }}">
+                                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" style="color: #00BFFF;"> <!-- #00BFFF es el código de color celeste -->
+                                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                                                                                                    </svg>
+                                                                                                                </button>
+
 
                                                         <form action="{{ route('consultas.eliminarConsulta', $cita->consulta->id) }}" method="POST" class="delete-form">
                                                             @csrf
@@ -116,9 +123,13 @@
                                                             <path d="M15,3C8.373,3,3,8.373,3,15c0,6.627,5.373,12,12,12s12-5.373,12-12C27,8.373,21.627,3,15,3z M21.707,12.707l-7.56,7.56 c-0.188,0.188-0.442,0.293-0.707,0.293s-0.52-0.105-0.707-0.293l-3.453-3.453c-0.391-0.391-0.391-1.023,0-1.414s1.023-0.391,1.414,0 l2.746,2.746l6.853-6.853c0.391-0.391,1.023-0.391,1.414,0S22.098,12.316,21.707,12.707z"></path>
                                                         </svg>
                                                         <!-- Botón 'Ver' -->
-                                                        <button type="button" class="bg-green-100 text-green-500 px-4 py-2 rounded-md hover:bg-green-200 transition ver-detalles-btn" data-consulta="{{ $cita->consulta }}">
-                                                            Ver
+                                                        <!-- Botón 'Ver' con ícono -->
+                                                        <button type="button" class="   ver-detalles-btn" data-consulta="{{ $cita->consulta }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" style="color: #00BFFF;"> <!-- #00BFFF es el código de color celeste -->
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                                            </svg>
                                                         </button>
+
                                                     @else
                                                         @if($cita->consulta)
                                                             <a href="{{ route('consultas.edit', $cita->consulta->id) }}">
