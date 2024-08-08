@@ -1,3 +1,5 @@
+@include("header")
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -14,10 +16,7 @@
             background-color: #f8fafc;
             color: #333;
         }
-        header, footer {
-            background-color: #1f2937;
-            color: white;
-        }
+
         .team-member, .service {
             background-color: white;
             border-radius: 10px;
@@ -31,21 +30,7 @@
             border-radius: 10px 10px 0 0;
             object-fit: cover;
         }
-        .button {
-            border: 2px solid white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            text-transform: uppercase;
-            font-weight: bold;
-            color: white;
-            background: transparent;
-            transition: all 0.3s ease-in-out;
-        }
-        .button:hover, .button:focus {
-            background-color: white;
-            color: black;
-            outline: none;
-        }
+
         .social-icons {
             display: flex;
             justify-content: center;
@@ -56,20 +41,12 @@
             font-size: 1.5rem;
             transition: color 0.3s ease;
         }
-        .social-icons a:hover {
-            color: #4A90E2; /* Color azul para hover */
-        }
+
         .section-spacing {
             padding-top: 4rem;
             padding-bottom: 4rem;
         }
-        .input-code {
-            background-color: #1f2937;
-            color: white;
-            border: 2px solid white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-        }
+
     </style>
     <!-- SEO Meta Tags -->
     <meta name="description" content="HealthCenter: Cuidando de tu salud con profesionalismo y dedicación. Conoce a nuestro equipo y servicios.">
@@ -78,32 +55,7 @@
 </head>
 <body class="font-sans antialiased">
     <!-- Header con navegación -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-gray-900 bg-opacity-25">
-        <nav class="container mx-auto p-4 flex justify-between items-center">
-            <div class="text-white font-bold text-2xl">HealthCenter</div>
-            <div class="flex space-x-4">
-                @if (Route::has('login'))
-                    @auth
-                        <!-- Enlace al dashboard si el usuario está autenticado -->
-                        <a href="{{ url('/dashboard') }}" class="button">
-                            Dashboard
-                        </a>
-                    @else
-                        <!-- Enlace para iniciar sesión si el usuario no está autenticado -->
-                        <a href="{{ route('login') }}" class="button">
-                            Iniciar sesión
-                        </a>
-                        <!-- Campo para ingresar el código -->
-                        <form action="{{ route('verificarCodigo') }}" method="POST" class="flex space-x-2">
-                            @csrf
-                            <input type="text" name="codigo" placeholder="Ingresa tu código" class="input-code" required>
-                            <button type="submit" class="button">Verificar</button>
-                        </form>
-                    @endauth
-                @endif
-            </div>
-        </nav>
-    </header>
+
     <!-- Contenedor principal con fondo y superposición -->
     <div class="relative bg-cover bg-center h-screen" style="background-image: url('https://images.unsplash.com/photo-1548101307-a757d5f06d27?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
         <!-- Superposición de color -->
@@ -189,16 +141,8 @@
         </div>
     </section>
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8">
-        <div class="container mx-auto text-center">
-            <div class="social-icons mb-4">
-                <a href="https://facebook.com" target="_blank" aria-label="Facebook"><img src="https://img.icons8.com/ios-glyphs/30/ffffff/facebook-new.png" alt="Facebook"></a>
-                <a href="https://twitter.com" target="_blank" aria-label="Twitter"><img src="https://img.icons8.com/ios-glyphs/30/ffffff/twitter.png" alt="Twitter"></a>
-                <a href="https://instagram.com" target="_blank" aria-label="Instagram"><img src="https://img.icons8.com/ios-glyphs/30/ffffff/instagram-new.png" alt="Instagram"></a>
-                <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><img src="https://img.icons8.com/ios-glyphs/30/ffffff/linkedin.png" alt="LinkedIn"></a>
-            </div>
-            <p>&copy; 2024 HealthCenter. Todos los derechos reservados.</p>
-        </div>
-    </footer>
+
 </body>
 </html>
+
+@include("footer")

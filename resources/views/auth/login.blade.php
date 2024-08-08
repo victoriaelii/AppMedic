@@ -3,7 +3,12 @@
 <!-- Usando el diseño de invitado -->
 <x-guest-layout>
         <!-- Contenedor principal con imagen de fondo -->
-  
+        <div>
+            <h2 class="text-center text-2xl font-semibold text-gray-900 mb-4">
+                Iniciar sesión en tu cuenta
+            </h2>
+        </div>
+
     <!-- Mostrar el estado de la sesión si existe -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -56,3 +61,4 @@
 </x-guest-layout>
 
 @include("footer")
+

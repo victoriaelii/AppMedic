@@ -54,16 +54,16 @@
                         <!-- Tabla de médicos -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);">
                             <!-- Cabecera de la tabla -->
-                            <thead class="bg-gray-50 border-b" style="background-color: rgba(255, 255, 255, 0.6);">
+                            <thead class="bg-gray-50 border-b text-center" style="background-color: rgba(255, 255, 255, 0.6);">
                                 <tr>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Nombres</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Apellido Paterno</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Apellido Materno</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Fecha de Nacimiento</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Correo</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Teléfono</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Rol</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Acciones</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Nombres</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Apellido Paterno</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Apellido Materno</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Fecha de Nacimiento</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Correo</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Teléfono</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Rol</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Acciones</th>
                                 </tr>
                             </thead>
                             <!-- Cuerpo de la tabla -->
@@ -71,14 +71,14 @@
                                 <!-- Iterar sobre los médicos y mostrar cada uno en una fila -->
                                 @foreach($medicos as $medico)
                                     <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
-                                        <td class="px-6 py-4 text-left">{{ $medico->nombres }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $medico->apepat }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $medico->apemat }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $medico->fechanac }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $medico->email }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $medico->telefono }}</td>
-                                        <td class="px-6 py-4 text-left">{{ $medico->rol }}</td>
-                                        <td class="px-6 py-4 text-left flex items-center space-x-2">
+                                        <td class="px-6 py-4 text-center">{{ $medico->nombres }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $medico->apepat }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $medico->apemat }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $medico->fechanac }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $medico->email }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $medico->telefono }}</td>
+                                        <td class="px-6 py-4 text-center">{{ $medico->rol }}</td>
+                                        <td class="px-6 py-4 text-center flex items-center space-x-2">
                                             <!-- Enlace para editar el médico -->
                                             <a href="{{ route('medicos.editar', $medico->id) }}" class="text-blue-600 hover:text-blue-900 transition">
                                                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 50 50" fill="currentColor">

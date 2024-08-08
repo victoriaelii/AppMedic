@@ -30,9 +30,9 @@
                             <!-- Cabecera de la tabla -->
                             <thead class="bg-gray-50 border-b" style="background-color: rgba(255, 255, 255, 0.6);">
                                 <tr>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Nombre</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Precio</th>
-                                    <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-700 text-lg">Acciones</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Nombre</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Precio</th>
+                                    <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-700 text-lg">Acciones</th>
                                 </tr>
                             </thead>
                             <!-- Cuerpo de la tabla -->
@@ -40,9 +40,9 @@
                                 <!-- Iterar sobre los servicios y mostrar cada uno en una fila -->
                                 @foreach($servicios as $servicio)
                                     <tr class="hover:bg-gray-100 transition" style="background-color: rgba(255, 255, 255, 0.6);">
-                                        <td class="px-6 py-4 text-left">{{ $servicio->nombre }}</td>
-                                        <td class="px-6 py-4 text-left">${{ number_format($servicio->precio, 2)}}</td>
-                                        <td class="px-6 py-4 text-left flex items-center space-x-2">
+                                        <td class="px-6 py-4 text-center">{{ $servicio->nombre }}</td>
+                                        <td class="px-6 py-4 text-center">${{ number_format($servicio->precio, 2)}}</td>
+                                        <td class="px-6 py-4 text-center flex items-center justify-center space-x-2">
                                             <!-- Enlace para editar el servicio -->
                                             <a href="{{ route('servicios.editar', $servicio->id) }}" class="text-blue-600 hover:text-blue-900 transition">
                                                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 50 50" fill="currentColor">

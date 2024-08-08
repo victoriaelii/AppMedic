@@ -25,18 +25,25 @@ class SecretariaController extends Controller
         $paciente = Paciente::with(['citas.consulta.servicios', 'citas.consulta.productos'])->findOrFail($id);
         return view('opciones.pacientes.historial_medico', compact('paciente'));
     }
+
+
+    
     
     public function buscarPaciente(Request $request)
     {
         $query = $request->input('q');
-        $pacientes = Paciente::where('nombres', 'like', "%{$query}%")
-            ->orWhere('apepat', 'like', "%{$query}%")
-            ->orWhere('apemat', 'like', "%{$query}%")
-            ->orWhere('correo', 'like', "%{$query}%")
+        $pacientes = Paciente::where('activo', 'si') // Filtrar solo pacientes activos
+            ->where(function($queryBuilder) use ($query) {
+                $queryBuilder->where('nombres', 'like', "%{$query}%")
+                             ->orWhere('apepat', 'like', "%{$query}%")
+                             ->orWhere('apemat', 'like', "%{$query}%")
+                             ->orWhere('correo', 'like', "%{$query}%");
+            })
             ->get(['id', 'nombres', 'apepat', 'apemat', 'correo']);
-    
+        
         return response()->json($pacientes);
     }
+    
     
     public function descargarHistorialMedicoPdf($id)
     {
@@ -55,42 +62,52 @@ class SecretariaController extends Controller
     // Muestra las citas pendientes por consultar
     public function porConsultar(Request $request)
     {
-        $query = Citas::with(['paciente', 'medico', 'consulta']);
-    
+        $query = Citas::with(['paciente', 'medico', 'consulta.servicios', 'consulta.productos', 'consulta.enfermera'])
+                    ->whereHas('paciente', function ($q) {
+                        $q->where('activo', 'si'); // Filtrar solo pacientes activos
+                    })
+                    ->where(function($query) {
+                        $query->where('activo', 'si')
+                                ->orWhereHas('consulta', function($q) {
+                                    // No es necesario agregar condiciones aquí
+                                });
+                    });
+
         // Filtrar por nombre, apellidos o correo del paciente
         if ($request->filled('nombre')) {
             $nombreCompleto = $request->input('nombre');
             $nombrePartes = explode(' ', $nombreCompleto);
-    
+
             $query->whereHas('paciente', function($q) use ($nombrePartes) {
                 foreach ($nombrePartes as $parte) {
                     $q->where(function($query) use ($parte) {
                         $query->where('nombres', 'like', '%' . $parte . '%')
-                              ->orWhere('apepat', 'like', '%' . $parte . '%')
-                              ->orWhere('apemat', 'like', '%' . $parte . '%');
+                            ->orWhere('apepat', 'like', '%' . $parte . '%')
+                            ->orWhere('apemat', 'like', '%' . $parte . '%');
                     });
                 }
             });
         }
-    
+
         // Filtrar por estado de la consulta
         if ($request->filled('estado')) {
             $query->whereHas('consulta', function($q) use ($request) {
                 $q->where('estado', $request->input('estado'));
             });
         }
-    
+
         // Filtrar por rol del usuario
         if (auth()->user()->rol == 'admin') {
             $query->whereHas('consulta', function($q) {
                 $q->where('estado', 'finalizada');
             });
         }
-    
+
         $citas = $query->paginate(10);
-    
+
         return view('opciones.consultas.porConsultar', compact('citas'));
     }
+
     
     
 
@@ -410,18 +427,26 @@ class SecretariaController extends Controller
     // Método para verificar el código y mostrar el historial médico
     public function verificarCodigo(Request $request)
     {
-        $request->validate([
-            'codigo' => 'required|string|size:8',
-        ]);
-
-        $paciente = Paciente::where('codigo', $request->codigo)->first();
-
-        if ($paciente && $paciente->citas->contains(fn($cita) => $cita->consulta && $cita->consulta->estado == 'finalizada')) {
-            return view('opciones.pacientes.historial_medico', compact('paciente'));
+        // Validar el código manualmente
+        if (strlen($request->codigo) !== 8) {
+            return response()->json(['message' => 'Código Incorrecto.'], 400);
         }
-
-        return redirect()->back()->with('error', 'Código inválido o sin citas finalizadas.');
+    
+        $paciente = Paciente::where('codigo', $request->codigo)->first();
+    
+        if ($paciente) {
+            if ($paciente->activo == 'no') {
+                return response()->json(['message' => 'El historial del paciente está inactivo.'], 400);
+            }
+    
+            if ($paciente->citas->contains(fn($cita) => $cita->consulta && $cita->consulta->estado == 'finalizada')) {
+                return response()->json(['redirect_url' => url('opciones/pacientes/historial_medico')]);
+            }
+        }
+    
+        return response()->json(['message' => 'Código Incorrecto o sin citas finalizadas.'], 400);
     }
+    
     // Guarda un nuevo paciente en la base de datos
     public function storePacientes(Request $request)
     {
@@ -612,47 +637,50 @@ class SecretariaController extends Controller
     {
         // Desactivar citas que tienen consulta asociada
         $this->desactivarCitasConConsulta();
-
+    
         $now = Carbon::now('America/Mexico_City');
-
+    
         $query = Citas::with(['paciente', 'medico'])
                     ->where('activo', 'si') // Solo citas activas
+                    ->whereHas('paciente', function ($query) {
+                        $query->where('activo', 'si'); // Solo pacientes activos
+                    })
                     ->where(function ($query) use ($now) {
                         $query->where('fecha', '>', $now->toDateString())
-                                ->orWhere(function ($query) use ($now) {
-                                    $query->where('fecha', '=', $now->toDateString())
+                              ->orWhere(function ($query) use ($now) {
+                                  $query->where('fecha', '=', $now->toDateString())
                                         ->where('hora', '>', $now->toTimeString());
-                                });
+                              });
                     });
-
+    
         // Aplicar filtros adicionales si se especifican en la búsqueda
         if ($request->filled('nombre')) {
             $nombre = $request->input('nombre');
             $query->whereHas('paciente', function ($query) use ($nombre) {
                 $query->where('nombres', 'like', "%{$nombre}%")
-                    ->orWhere('apepat', 'like', "%{$nombre}%")
-                    ->orWhere('apemat', 'like', "%{$nombre}%");
+                      ->orWhere('apepat', 'like', "%{$nombre}%")
+                      ->orWhere('apemat', 'like', "%{$nombre}%");
             });
         }
-
+    
         if ($request->filled('fecha')) {
             $fecha = $request->input('fecha');
             $query->whereDate('fecha', $fecha);
         }
-
+    
         if ($request->filled('correo')) {
             $correo = $request->input('correo');
             $query->whereHas('paciente', function ($query) use ($correo) {
                 $query->where('correo', 'like', "%{$correo}%");
             });
         }
-
+    
         // Obtener las citas ordenadas por fecha y hora, paginadas
         $citas = $query->orderBy('fecha')->orderBy('hora')->paginate(10);
-
+    
         return view('opciones.citas.tablaCitas', compact('citas'));
     }
-
+    
     
     // Desactiva las citas pasadas
     public function desactivarCitasPasadas()

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-guest-layout>
         <!-- Formulario para registrar una cita -->
-        <form method="POST" action="{{ route('citas.store') }}">
+        <form method="POST" action="{{ route('citas.store') }}" id="registrar-cita-form">
             @csrf
 
             <div class="grid grid-cols-2 gap-4">
@@ -55,7 +55,7 @@
 
             <!-- Botón para registrar la cita -->
             <div class="flex items-center justify-end mt-4">
-                <x-primary-button class="ml-4">
+                <x-primary-button class="ml-4" id="registrar-cita-btn">
                     {{ __('Registrar Cita') }}
                 </x-primary-button>
             </div>
@@ -65,13 +65,18 @@
                 {{ __('Registrar Paciente') }}
             </button>
         </a>
-        
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const pacienteSearch = document.getElementById('paciente_search');
                 const pacienteSuggestions = document.getElementById('paciente_suggestions');
                 const pacienteId = document.getElementById('pacienteid');
+                const registrarCitaForm = document.getElementById('registrar-cita-form');
+                const registrarCitaBtn = document.getElementById('registrar-cita-btn');
 
+                // Búsqueda de paciente
+                // Búsqueda de paciente
                 pacienteSearch.addEventListener('input', function () {
                     const query = pacienteSearch.value;
 
@@ -96,6 +101,24 @@
                         pacienteSuggestions.innerHTML = '';
                     }
                 });
+
+
+                registrarCitaBtn.addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevenir el envío inmediato del formulario
+
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'La cita ha sido registrada con éxito.',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Aceptar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            registrarCitaForm.submit(); // Enviar el formulario después de mostrar el mensaje de éxito
+                        }
+                    });
+                });
+
             });
         </script>
     </x-guest-layout>
