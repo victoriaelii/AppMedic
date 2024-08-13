@@ -11,6 +11,8 @@
                         <!-- Imagen del logo personalizado -->
                         <img src="{{ asset('images/logoH.png') }}" alt="Logo HealthCenter" class="block h-9 w-auto" />
                     </a>
+                    <span class="text-black text-2xl font-bold tracking-normal">Health Center</span> <!-- Texto al lado del logo -->
+
                 </div>
 
                 <!-- Enlaces de Navegación -->

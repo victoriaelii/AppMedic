@@ -7,8 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Consultorio Médico</title>
     <!-- Fuentes -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet"/>
+
     <!-- Estilos -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
@@ -59,7 +58,7 @@
     <!-- Contenedor principal con fondo y superposición -->
     <div class="relative bg-cover bg-center h-screen" style="background-image: url('https://images.unsplash.com/photo-1548101307-a757d5f06d27?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
         <!-- Superposición de color -->
-        <div class="absolute inset-0 bg-gray-900 bg-opacity-50"></div>
+        <div class="absolute inset-0"></div>
         <!-- Contenido principal -->
         <div class="relative z-10 flex flex-col items-center justify-center h-full text-white text-center">
             <h1 class="text-5xl font-bold mb-4">HealthCenter</h1>
@@ -79,70 +78,53 @@
                     <p class="mt-2">Fácil agendamiento</p>
                 </div>
             </div>
+            <!-- Formulario de ingreso de código -->
+            <div class="mt-10">
+                <form id="codigoForm" class="flex space-x-2">
+                    @csrf
+                    <input type="text" name="codigo" placeholder="Ingresa tu código" class="input-code bg-transparent border-2 border-white text-white px-4 py-2 rounded-md placeholder-white focus:ring-2 focus:ring-blue-500 transition" required>
+                    <button type="submit" class="text-white hover:text-gray-400 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 50 50" fill="currentColor">
+                            <path d="M 21 3 C 11.621094 3 4 10.621094 4 20 C 4 29.378906 11.621094 37 21 37 C 24.710938 37 28.140625 35.804688 30.9375 33.78125 L 44.09375 46.90625 L 46.90625 44.09375 L 33.90625 31.0625 C 36.460938 28.085938 38 24.222656 38 20 C 38 10.621094 30.378906 3 21 3 Z M 21 5 C 29.296875 5 36 11.703125 36 20 C 36 28.296875 29.296875 35 21 35 C 12.703125 35 6 28.296875 6 20 C 6 11.703125 12.703125 5 21 5 Z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
-    <!-- Sección "Nuestro enfoque" -->
-    <section class="container mx-auto section-spacing">
-        <h2 class="text-3xl font-bold text-center mb-8">Nuestro enfoque</h2>
-        <p class="text-center max-w-2xl mx-auto">
-            Somos un grupo de psicólogos y psiquiatras con doctorados y ofrecemos atención a la salud mental de alta calidad. Estamos especializados en salud mental y proporcionamos servicios de terapia, control de la medicación, asesoramiento psicológico y más. Te pondremos en contacto con uno de nuestros médicos según tus necesidades y su disponibilidad, ya sea en línea o en persona.
-        </p>
-    </section>
-    <!-- Sección "Conoce a nuestro equipo" -->
-    <section class="container mx-auto section-spacing">
-        <h2 class="text-3xl font-bold text-center mb-8">Conoce a nuestro equipo</h2>
-        <div class="flex justify-center space-x-8">
-            <div class="team-member w-64">
-                <img src="https://images.unsplash.com/photo-1651008376811-b90baee60c1f?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Victoria Juarez" class="w-full h-56 object-cover">
-                <div class="p-4">
-                    <h3 class="text-xl font-bold">Médico General</h3>
-                    <p class="text-gray-600">Victoria Juarez</p>
-                </div>
-            </div>
-            <div class="team-member w-64">
-                <img src="https://images.unsplash.com/photo-1649642828190-d6f6f71702d6?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Elizabeth Morales" class="w-full h-56 object-cover">
-                <div class="p-4">
-                    <h3 class="text-xl font-bold">Recepcionista Lic.</h3>
-                    <p class="text-gray-600">Elizabeth Morales</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Sección "Nuestros servicios" -->
-    <section class="bg-gray-100 text-gray-800 section-spacing">
-        <div class="container mx-auto text-center">
-            <h2 class="text-3xl font-bold mb-8">Nuestros servicios</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-                <div class="service">
-                    <img src="https://images.unsplash.com/photo-1616012481039-5de1dcb42934?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Radiografía" class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h3 class="text-xl font-bold">Radiografía</h3>
-                    </div>
-                </div>
-                <div class="service">
-                    <img src="https://images.unsplash.com/photo-1706065264583-55f1a8549769?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Ecografía (Ultrasonido)" class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h3 class="text-xl font-bold">Ecografía (Ultrasonido)</h3>
-                    </div>
-                </div>
-                <div class="service">
-                    <img src="https://images.unsplash.com/photo-1578496479531-32e296d5c6e1?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Pruebas de Laboratorio" class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h3 class="text-xl font-bold">Pruebas de Laboratorio</h3>
-                    </div>
-                </div>
-                <div class="service">
-                    <img src="https://images.unsplash.com/photo-1581090122319-8fab9528eaaa?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Terapia Física y Rehabilitación" class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h3 class="text-xl font-bold">Terapia Física y Rehabilitación</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Footer -->
+    
 
 </body>
 </html>
 
 @include("footer")
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Script para manejar la verificación del código con AJAX -->
+<script>
+    $(document).ready(function() {
+        $('#codigoForm').on('submit', function(e) {
+            e.preventDefault(); 
+            $.ajax({
+                url: '{{ route('verificarCodigo') }}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url;
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON.message || 'Código inválido o sin citas finalizadas.',
+                        confirmButtonText: 'Ok'
+                    });
+                }
+            });
+        });
+    });
+</script>
