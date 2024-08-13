@@ -1,6 +1,8 @@
-<header class="fixed top-0 left-0 right-0 z-50 bg-gray-900 bg-opacity-50 backdrop-blur-lg shadow-lg">
+<header class="fixed top-0 left-0 right-0 z-50 bg-gray-900 bg-opacity-30 backdrop-blur-lg shadow-lg">
     <nav class="container mx-auto p-4 flex justify-between items-center">
-        <a href="{{ url('/') }}" class="text-white font-bold text-2xl tracking-wide">HealthCenter</a>
+        <a href="{{ url('/') }}">
+            <img src="{{ asset('images/logoH.png') }}" alt="HealthCenter Logo" class="h-16 w-auto"> <!-- Ajusta la clase h-16 para aumentar el tamaño -->
+        </a>
         <div class="flex space-x-6 items-center">
             @if (Route::has('login'))
                 @auth
@@ -27,7 +29,6 @@
         </div>
     </nav>
 </header>
-
 
 
 <!-- Importa jQuery y SweetAlert -->

@@ -8,8 +8,8 @@
                 <div class="shrink-0 flex items-center">
                     <!-- Enlace al dashboard -->
                     <a href="{{ route('dashboardOpciones') }}">
-                        <!-- Componente del logo de la aplicación -->
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <!-- Imagen del logo personalizado -->
+                        <img src="{{ asset('images/logoH.png') }}" alt="Logo HealthCenter" class="block h-9 w-auto" />
                     </a>
                 </div>
 
@@ -116,9 +116,26 @@
                     <x-slot name="trigger">
                         <!-- Botón de Desplegable para el menú de configuración -->
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div class="mr-2 font-medium text-sm text-gray-500">{{ Auth::user()->email }} </div>
 
-                            <div class="font-medium text-sm text-gray-500">{{ Auth::user()->rol }}</div>
+                            <div class="font-medium text-sm text-gray-500">
+                                @switch(Auth::user()->rol)
+                                    @case('medico')
+                                        Médico
+                                        @break
+                                    @case('secretaria')
+                                        Secretaria
+                                        @break
+                                    @case('admin')
+                                        Administrador
+                                        @break
+                                    @default
+                                        {{ Auth::user()->rol }}
+                                @endswitch
+                            </div>
+
+                            <div class="ms-2 font-medium text-sm text-gray-500">
+                                {{ Auth::user()->email }}
+                            </div>
 
                             <div class="ms-1">
                                 <!-- Icono de Flecha -->
@@ -149,6 +166,8 @@
                 </x-dropdown>
                 @endauth
             </div>
+
+
 
             <!-- Botón de Menú para Móviles -->
             <div class="-me-2 flex items-center sm:hidden">

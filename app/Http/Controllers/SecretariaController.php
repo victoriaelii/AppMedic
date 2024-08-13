@@ -847,9 +847,13 @@ class SecretariaController extends Controller
         $cita->activo = 'no';
         $cita->save();
     
+        if (request()->ajax()) {
+            return response()->json(['status' => 'Cita eliminada correctamente']);
+        }
+    
         return redirect()->route('tablaCitas')->with('status', 'Cita eliminada correctamente');
     }
-
+    
     // Obtiene las citas activas y las devuelve en formato JSON para el calendario
     public function getCitasEventos()
     {

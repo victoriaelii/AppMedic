@@ -33,7 +33,7 @@
                                             <button type="button" class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50" onclick="changeMonth(1)">
                                                 <span class="sr-only">Next month</span>
                                                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5-4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -81,7 +81,7 @@
                                     <div class="flex bg-gray-200 text-xs leading-6 text-gray-700 lg:flex-auto">
                                         <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-6 lg:gap-px" id="calendar-grid">
                                             @foreach ($citas as $cita)
-                                                <div class="relative bg-white px-3 py-2 h-24 calendar-day {{ $cita->fecha == \Carbon\Carbon::today()->toDateString() ? 'today' : '' }}">
+                                                <div class="relative bg-white px-3 py-2 h-24 calendar-day {{ $cita->fecha == \Carbon\Carbon::today()->toDateString() ? 'today' : '' }}" data-date="{{ $cita->fecha }}">
                                                     <!-- Muestra la fecha y las citas del día -->
                                                     <time datetime="{{ $cita->fecha }}">{{ \Carbon\Carbon::parse($cita->fecha)->format('j') }}</time>
                                                     <div class="text-xs text-blue-500">
@@ -124,8 +124,8 @@
     </div>
 </x-app-layout>
 
+<!-- Agregar estilos para el calendario -->
 <style>
-    /* Estilos para el contenedor del día en el calendario */
     .calendar-day {
         max-height: 100px; 
         overflow-y: auto;
@@ -133,7 +133,6 @@
     .calendar-day div {
         margin-bottom: 4px; 
     }
-    /* Ocultar scrollbar en contenedor del día en el calendario */
     .calendar-day::-webkit-scrollbar {
         display: none;
     }
@@ -141,37 +140,103 @@
         -ms-overflow-style: none; 
         scrollbar-width: none;  
     }
-    /* Estilo para el día actual */
     .today {
         background-color: #f0f8ff; 
     }
 </style>
 
+<!-- Script para manejar el calendario y las citas -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    // Variables para manejar la fecha inicial y la fecha actual
-    const initialDate = new Date();
-    let currentDate = new Date();
-    // Obtener las citas desde el backend
-    const citas = @json($citas);
+    document.addEventListener('DOMContentLoaded', updateCalendar);
 
-    // Función para cambiar el mes en el calendario
-    function changeMonth(monthChange) {
-        const newDate = new Date(currentDate.setMonth(currentDate.getMonth() + monthChange));
-        if (newDate < initialDate) {
-            currentDate = initialDate;
-        } else {
-            currentDate = newDate;
-        }
-        updateCalendar();
+    function attachClickEventToDays() {
+        const calendarDays = document.querySelectorAll('.calendar-day');
+
+        calendarDays.forEach(day => {
+            day.addEventListener('click', function() {
+                const date = this.getAttribute('data-date');
+                const citasForDay = citas.filter(cita => cita.fecha === date);
+
+                if (citasForDay.length > 0) {
+                    let citasHtml = '<div style="text-align: left;">';
+                    citasForDay.forEach(cita => {
+                        citasHtml += `
+                            <div style="margin-bottom: 10px;">
+                                <p><strong>Hora:</strong> ${cita.hora}</p>
+                                <p><strong>Paciente:</strong> ${cita.paciente.nombres} ${cita.paciente.apepat} ${cita.paciente.apemat}</p>
+                                <p><strong>Médico:</strong> ${cita.medico.nombres} ${cita.medico.apepat}</p>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <a href="/opciones/citas/editar/${cita.id}" class="text-yellow-600 hover:text-yellow-900 transition" title="Editar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                        </svg>
+                                    </a>
+                                    <button type="button" class="text-red-600 hover:text-red-900 transition delete-button" data-id="${cita.id}" title="Eliminar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>`;
+                    });
+                    citasHtml += '</div>';
+
+                    Swal.fire({
+                        title: `Citas para el ${date}`,
+                        html: citasHtml,
+                        icon: 'info',
+                        customClass: {
+                            popup: 'swal-wide',
+                            title: 'swal-title',
+                            content: 'swal-content'
+                        },
+                        showConfirmButton: false
+                    });
+
+                    // Agregar el event listener a los botones de eliminar después de que se haya renderizado el SweetAlert
+                    document.querySelectorAll('.delete-button').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const citaId = this.getAttribute('data-id');
+                            Swal.fire({
+                                title: '¿Estás seguro?',
+                                text: "Esta acción no se puede deshacer",
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: '#3085d6',
+                                confirmButtonText: 'Sí, eliminarla',
+                                cancelButtonText: 'Cancelar'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Hacer la solicitud para eliminar la cita
+                                    axios.delete(`/opciones/citas/eliminar/${citaId}`)
+                                        .then(response => {
+                                            Swal.fire(
+                                                'Eliminada',
+                                                'La cita ha sido eliminada.',
+                                                'success'
+                                            ).then(() => {
+                                                location.reload(); // Recargar la página para reflejar los cambios
+                                            });
+                                        })
+                                        .catch(error => {
+                                            Swal.fire(
+                                                'Error',
+                                                'Hubo un problema al eliminar la cita.',
+                                                'error'
+                                            );
+                                        });
+                                }
+                            });
+                        });
+                    });
+                }
+            });
+        });
     }
 
-    // Función para volver al mes actual
-    function goToToday() {
-        currentDate = new Date();
-        updateCalendar();
-    }
-
-    // Función para actualizar el calendario con las citas
     function updateCalendar() {
         const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
         const currentYear = currentDate.getFullYear();
@@ -206,7 +271,7 @@
 
             const isToday = dateString === today ? 'today' : ''; 
 
-            calendarGrid += `<div class="relative bg-white px-3 py-2 h-24 calendar-day ${isToday}">
+            calendarGrid += `<div class="relative bg-white px-3 py-2 h-24 calendar-day ${isToday}" data-date="${dateString}">
                                 <time datetime="${dateString}">${i}</time>
                                 ${citaContent}
                              </div>`;
@@ -226,9 +291,9 @@
         document.getElementById('prev-month-btn').disabled = currentDate.getMonth() === initialDate.getMonth() && currentDate.getFullYear() === initialDate.getFullYear();
         
         updateCurrentDayCitas();
+        attachClickEventToDays();
     }
 
-    // Función para actualizar la lista de citas del día actual
     function updateCurrentDayCitas() {
         const today = new Date().toISOString().split('T')[0];
         const currentDayCitas = citas.filter(cita => cita.fecha === today);
@@ -242,10 +307,28 @@
                           </div>`;
         });
 
-
         document.getElementById('current-day-citas-list').innerHTML = citasHtml;
     }
 
-    // Inicializar el calendario cuando el documento esté listo
-    document.addEventListener('DOMContentLoaded', updateCalendar);
+    const initialDate = new Date();
+    let currentDate = new Date();
+    const citas = @json($citas);
+
+    // Initialize the calendar
+    updateCalendar();
 </script>
+
+<!-- Añadir estilos personalizados para SweetAlert -->
+<style>
+    .swal-wide {
+        width: 600px !important;
+    }
+    .swal-title {
+        font-size: 24px;
+        color: #333;
+    }
+    .swal-content {
+        font-size: 18px;
+        text-align: left;
+    }
+</style>
