@@ -10,6 +10,9 @@ use App\Models\Servicio;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Consultas; 
+use Illuminate\Support\Facades\DB;
+
+
 use PDF; 
 
 // Controlador que maneja las funciones de la secretaria
@@ -26,6 +29,148 @@ class SecretariaController extends Controller
         return view('opciones.pacientes.historial_medico', compact('paciente'));
     }
 
+
+//////// REPORTES
+
+    public function mostrarReportes()
+    {
+        $hoy = Carbon::now()->toDateString();
+
+        // Obtener productos vendidos con la fecha de creación
+        $ventasDelDia = DB::table('consulta_producto')
+                            ->join('productos', 'consulta_producto.producto_id', '=', 'productos.id')
+                            ->whereDate('consulta_producto.created_at', $hoy)
+                            ->select('productos.nombre', 'productos.precio', 'consulta_producto.cantidad', 'consulta_producto.created_at as fecha_vencimiento', DB::raw('productos.precio * consulta_producto.cantidad as total'))
+                            ->get();
+
+        $totalVentasProductos = $ventasDelDia->sum('total');
+
+        // Obtener servicios vendidos con la fecha de creación
+        $serviciosDelDia = DB::table('consulta_servicio')
+                            ->join('servicios', 'consulta_servicio.servicio_id', '=', 'servicios.id')
+                            ->whereDate('consulta_servicio.created_at', $hoy)
+                            ->select('servicios.nombre', 'servicios.precio', 'consulta_servicio.created_at as fecha_vencimiento', DB::raw('servicios.precio as total'))
+                            ->get();
+
+        $totalVentasServicios = $serviciosDelDia->sum('total');
+
+        // Total general
+        $totalVentas = $totalVentasProductos + $totalVentasServicios;
+
+        return view('opciones.Reportes.VistaReportes', compact('ventasDelDia', 'totalVentasProductos', 'serviciosDelDia', 'totalVentasServicios', 'totalVentas'));
+    }
+
+    public function generarReporte(Request $request)
+    {
+        // Validar los datos recibidos del formulario
+        $request->validate([
+            'mes' => 'required',
+            'anio' => 'required|numeric',
+        ]);
+    
+        $mes = $request->input('mes');
+        $anio = $request->input('anio');
+    
+        // Obtener productos vendidos en el mes seleccionado con la fecha de creación
+        $ventasDelMes = DB::table('consulta_producto')
+                            ->join('productos', 'consulta_producto.producto_id', '=', 'productos.id')
+                            ->whereMonth('consulta_producto.created_at', $mes)
+                            ->whereYear('consulta_producto.created_at', $anio)
+                            ->select('productos.nombre', 'productos.precio', 'consulta_producto.cantidad', 'consulta_producto.created_at as fecha_vencimiento', DB::raw('productos.precio * consulta_producto.cantidad as total'))
+                            ->get();
+    
+        $totalVentasProductosMes = $ventasDelMes->sum('total');
+    
+        // Obtener servicios vendidos en el mes seleccionado con la fecha de creación
+        $serviciosDelMes = DB::table('consulta_servicio')
+                            ->join('servicios', 'consulta_servicio.servicio_id', '=', 'servicios.id')
+                            ->whereMonth('consulta_servicio.created_at', $mes)
+                            ->whereYear('consulta_servicio.created_at', $anio)
+                            ->select('servicios.nombre', 'servicios.precio', 'consulta_servicio.created_at as fecha_vencimiento', DB::raw('servicios.precio as total'))
+                            ->get();
+    
+        $totalVentasServiciosMes = $serviciosDelMes->sum('total');
+    
+        // Total general del mes
+        $totalVentasMes = $totalVentasProductosMes + $totalVentasServiciosMes;
+    
+        // Redirigir a la vista con los datos del reporte
+        return view('opciones.Reportes.VistaReportes', [
+            'ventasDelDia' => $ventasDelMes,
+            'totalVentasProductos' => $totalVentasProductosMes,
+            'serviciosDelDia' => $serviciosDelMes,
+            'totalVentasServicios' => $totalVentasServiciosMes,
+            'totalVentas' => $totalVentasMes,
+        ])->with('success', 'Reporte mensual generado correctamente.');
+    }
+    
+    
+
+    /// PDF REPORTES
+
+    public function descargarReporteDelDiaPdf()
+    {
+        $hoy = Carbon::now()->toDateString();
+
+        // Obtener productos vendidos
+        $ventasDelDia = DB::table('consulta_producto')
+            ->join('productos', 'consulta_producto.producto_id', '=', 'productos.id')
+            ->whereDate('consulta_producto.created_at', $hoy)
+            ->select('productos.nombre', 'productos.precio', 'consulta_producto.cantidad', DB::raw('productos.precio * consulta_producto.cantidad as total'))
+            ->get();
+
+        $totalVentasProductos = $ventasDelDia->sum('total');
+
+        // Obtener servicios vendidos
+        $serviciosDelDia = DB::table('consulta_servicio')
+            ->join('servicios', 'consulta_servicio.servicio_id', '=', 'servicios.id')
+            ->whereDate('consulta_servicio.created_at', $hoy)
+            ->select('servicios.nombre', 'servicios.precio', DB::raw('servicios.precio as total'))
+            ->get();
+
+        $totalVentasServicios = $serviciosDelDia->sum('total');
+
+        // Total general
+        $totalVentas = $totalVentasProductos + $totalVentasServicios;
+
+        $pdf = PDF::loadView('opciones.Reportes.ReporteDelDiaPdf', compact('ventasDelDia', 'totalVentasProductos', 'serviciosDelDia', 'totalVentasServicios', 'totalVentas'));
+
+        return $pdf->download('reporte_ventas_del_dia.pdf');
+    }
+
+    public function descargarReporteMensualPdf(Request $request)
+    {
+        $mes = $request->input('mes');
+        $anio = $request->input('anio');
+
+        // Obtener productos vendidos en el mes seleccionado
+        $ventasDelMes = DB::table('consulta_producto')
+            ->join('productos', 'consulta_producto.producto_id', '=', 'productos.id')
+            ->whereMonth('consulta_producto.created_at', $mes)
+            ->whereYear('consulta_producto.created_at', $anio)
+            ->select('productos.nombre', 'productos.precio', 'consulta_producto.cantidad', 'consulta_producto.created_at', DB::raw('productos.precio * consulta_producto.cantidad as total'))
+            ->get();
+
+        $totalVentasProductosMes = $ventasDelMes->sum('total');
+
+        // Obtener servicios vendidos en el mes seleccionado
+        $serviciosDelMes = DB::table('consulta_servicio')
+            ->join('servicios', 'consulta_servicio.servicio_id', '=', 'servicios.id')
+            ->whereMonth('consulta_servicio.created_at', $mes)
+            ->whereYear('consulta_servicio.created_at', $anio)
+            ->select('servicios.nombre', 'servicios.precio', 'consulta_servicio.created_at', DB::raw('servicios.precio as total'))
+            ->get();
+
+        $totalVentasServiciosMes = $serviciosDelMes->sum('total');
+
+        // Total general del mes
+        $totalVentasMes = $totalVentasProductosMes + $totalVentasServiciosMes;
+
+        $pdf = PDF::loadView('opciones.Reportes.ReporteMensualPdf', compact('ventasDelMes', 'totalVentasProductosMes', 'serviciosDelMes', 'totalVentasServiciosMes', 'totalVentasMes'));
+
+        return $pdf->download('reporte_ventas_mensual.pdf');
+    }
+    //////////////////////////
 
     
     
@@ -68,7 +213,7 @@ class SecretariaController extends Controller
                     ->where(function($query) {
                         $query->where('activo', 'si')
                                 ->orWhereHas('consulta', function($q) {
-                                    // No es necesario agregar condiciones aquí
+                                    
                                 });
                     });
     
@@ -186,7 +331,10 @@ class SecretariaController extends Controller
             if ($request->has('servicios')) {
                 $servicios = Servicio::whereIn('id', $request->servicios)->get();
                 foreach ($servicios as $servicio) {
-                    $consulta->servicios()->attach($servicio->id);
+                    $consulta->servicios()->attach($servicio->id, [
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
                     $totalPagar += $servicio->precio;
                     $detalleCostos[] = ['nombre' => $servicio->nombre, 'precio' => $servicio->precio, 'cantidad' => 1, 'tipo' => 'servicio'];
                 }
@@ -198,7 +346,11 @@ class SecretariaController extends Controller
                     if (isset($productoData['id']) && isset($productoData['cantidad']) && $productoData['cantidad'] > 0) {
                         $producto = Productos::findOrFail($productoData['id']);
                         $cantidad = $productoData['cantidad'];
-                        $consulta->productos()->attach($producto->id, ['cantidad' => $cantidad]);
+                        $consulta->productos()->attach($producto->id, [
+                            'cantidad' => $cantidad,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                         $totalPagar += $producto->precio * $cantidad;
                         $detalleCostos[] = ['nombre' => $producto->nombre, 'precio' => $producto->precio * $cantidad, 'cantidad' => $cantidad, 'tipo' => 'producto'];
     
@@ -223,6 +375,7 @@ class SecretariaController extends Controller
             return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
         }
     }
+    
     
     
 
@@ -502,8 +655,9 @@ class SecretariaController extends Controller
         }
     
         $pacientes = $query->where('activo', 'si')->get();
+        $totalPacientesActivos = $pacientes->count();
     
-        return view('/opciones.dashboardOpciones', compact('pacientes'));
+        return view('/opciones.dashboardOpciones', compact('pacientes', 'totalPacientesActivos'));
     }
     
     
@@ -643,7 +797,7 @@ class SecretariaController extends Controller
         // Desactivar citas que tienen consulta asociada
         $this->desactivarCitasConConsulta();
     
-        $now = Carbon::now('America/Mexico_City');
+        $now = Carbon::now('America/Monterrey');
     
         $query = Citas::with(['paciente', 'medico'])
                     ->where('activo', 'si') // Solo citas activas
@@ -680,17 +834,21 @@ class SecretariaController extends Controller
             });
         }
     
+        // Contar el total de citas activas
+        $totalCitasActivas = $query->count();
+    
         // Obtener las citas ordenadas por fecha y hora, paginadas
         $citas = $query->orderBy('fecha')->orderBy('hora')->paginate(10);
     
-        return view('opciones.citas.tablaCitas', compact('citas'));
+        return view('opciones.citas.tablaCitas', compact('citas', 'totalCitasActivas'));
     }
+    
     
     
     // Desactiva las citas pasadas
     public function desactivarCitasPasadas()
     {
-        $now = Carbon::now('America/Mexico_City');
+        $now = Carbon::now('America/Monterrey');
     
         Citas::where(function ($query) use ($now) {
             $query->where('fecha', '<', $now->toDateString())
@@ -704,7 +862,7 @@ class SecretariaController extends Controller
     // Muestra las citas activas
     public function mostrarCitas()
     {
-        $now = Carbon::now('America/Mexico_City');
+        $now = Carbon::now('America/Monterrey');
         
         $citas = Citas::with(['paciente', 'medico'])
                       ->where(function ($query) use ($now) {
@@ -730,34 +888,34 @@ class SecretariaController extends Controller
             'pacienteid' => 'required|exists:pacientes,id',
             'medicoid' => 'required|exists:users,id',
         ]);
-    
+
         $fecha = $request->input('fecha');
         $hora = $request->input('hora');
-        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $fecha . ' ' . $hora, 'America/Mexico_City');
-        $ahora = Carbon::now('America/Mexico_City');
-    
+        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $fecha . ' ' . $hora, 'America/Monterrey');
+        $ahora = Carbon::now('America/Monterrey');
+
         if ($fechaHoraCita->isPast()) {
             return back()->withErrors(['hora' => 'Hora pasada. Elige una hora futura.'])->withInput();
         }
-    
+
         $existingAppointment = Citas::where('fecha', $request->fecha)
             ->where('pacienteid', $request->pacienteid)
             ->where('activo', 'si')
             ->first();
-    
+
         if ($existingAppointment) {
             return back()->withErrors(['fecha' => 'El paciente ya tiene una cita activa agendada para esta fecha.'])->withInput();
         }
-    
+
         $existingAppointmentSameHour = Citas::where('fecha', $request->fecha)
             ->where('hora', $request->hora)
             ->where('activo', 'si')
             ->first();
-    
+
         if ($existingAppointmentSameHour) {
             return back()->withErrors(['hora' => 'Ya existe una cita activa a esta hora.'])->withInput();
         }
-    
+
         Citas::create([
             'fecha' => $request->fecha,
             'hora' => $request->hora,
@@ -765,10 +923,11 @@ class SecretariaController extends Controller
             'medicoid' => $request->medicoid,
             'activo' => 'si',
         ]);
-    
+
         $redirect_to = $request->input('redirect_to', 'tablaCitas');
-        return redirect()->route($redirect_to)->with('status', 'Cita registrada correctamente');
+        return redirect()->route($redirect_to)->with('status', 'Cita registrada correctamente')->with('success', true);
     }
+
 
 
     // Muestra el formulario para agregar una nueva cita
@@ -802,8 +961,8 @@ class SecretariaController extends Controller
         ]);
     
         // Valida que la hora no sea pasada
-        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $request->fecha . ' ' . $hora, 'America/Mexico_City');
-        $ahora = Carbon::now('America/Mexico_City');
+        $fechaHoraCita = Carbon::createFromFormat('Y-m-d H:i', $request->fecha . ' ' . $hora, 'America/Monterrey');
+        $ahora = Carbon::now('America/Monterrey');
         if ($fechaHoraCita->isPast()) {
             return back()->withErrors(['hora' => 'Hora pasada. Elige una hora futura.'])->withInput();
         }
@@ -906,10 +1065,14 @@ class SecretariaController extends Controller
         $medicos = $query->whereIn('rol', ['medico', 'secretaria', 'enfermera'])
                         ->where('activo', 'si')
                         ->get();
+    
+        // Contar el total de usuarios activos
+        $totalUsuariosActivos = $medicos->count();
         
         // Devolver la vista con los datos filtrados
-        return view('/opciones.medicos.medicos', compact('medicos'));
+        return view('/opciones.medicos.medicos', compact('medicos', 'totalUsuariosActivos'));
     }
+    
     
 
     // Guarda un nuevo médico en la base de datos

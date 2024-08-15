@@ -9,8 +9,14 @@
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">
                         <!-- Encabezado de la tabla -->
-                        <div class="flex my-4 items-center justify-between">
+                        <div class="flex justify-between items-center mb-6">
                             <h1 class="text-2xl font-semibold text-gray-800 uppercase">Citas</h1>
+                            <div class="flex items-center space-x-2 bg-blue-100 text-blue-600 px-4 py-2 rounded-full shadow-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                </svg>
+                                <span class="text-lg font-medium">Total de citas activas: {{ $totalCitasActivas }}</span>
+                            </div>
                             <!-- Botón para agregar nueva cita -->
                             <a href="{{ route('crearCita') }}">
                                 <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
@@ -55,7 +61,7 @@
                                         <td class="px-6 py-4 text-center">{{ $cita->medico->nombres }} {{ $cita->medico->apepat }}</td>
                                         <td class="px-6 py-4 text-center flex items-center justify-center space-x-2">
                                             <!-- Enlace para editar la cita -->
-                                            <a href="{{ route('citas.editar', $cita->id) }}" class="text-yellow-600 hover:text-yellow-900 transition">
+                                            <a href="{{ route('citas.editar', $cita->id) }}" class="text-green-600 hover:text-green-900 transition">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                                 </svg>

@@ -6,7 +6,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">
                         <!-- Encabezado de la sección -->
-                        <div class="flex my-4 items-center justify-between">
+                        <div class=" flex justify-between items-center mb-6">
                             <h1 class="text-2xl font-semibold text-gray-800 uppercase">Consultas</h1>
                         </div>
 
@@ -72,18 +72,17 @@
                                                         ${{ number_format($cita->consulta->totalPagar, 2) }}
                                                     </td>
                                                     <td class="px-6 py-4 flex items-center justify-center space-x-2">
-                                                        <a href="{{ route('consultas.edit', $cita->consulta->id) }}" class="text-yellow-600 hover:text-yellow-900 transition">
+                                                        <a href="{{ route('consultas.edit', $cita->consulta->id) }}" class="text-green-600 hover:text-green-900 transition">
                                                             <!-- Ícono de editar -->
                                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                                             </svg>
                                                         </a>
-                                                                                                                <!-- Botón 'Ver' -->
-                                                                                                                <button type="button" class="   ver-detalles-btn" data-consulta="{{ $cita->consulta }}">
-                                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" style="color: #00BFFF;"> <!-- #00BFFF es el código de color celeste -->
-                                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                                                                                                                    </svg>
-                                                                                                                </button>
+                                                        <button type="button" class="   ver-detalles-btn" data-consulta="{{ $cita->consulta }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" style="color: #00BFFF;"> <!-- #00BFFF es el código de color celeste -->
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                                            </svg>
+                                                        </button>
 
 
                                                         <form action="{{ route('consultas.eliminarConsulta', $cita->consulta->id) }}" method="POST" class="delete-form">
@@ -133,7 +132,7 @@
                                                     @else
                                                         @if($cita->consulta)
                                                             <a href="{{ route('consultas.edit', $cita->consulta->id) }}">
-                                                                <button class="text-blue-600 hover:text-blue-900 transition">
+                                                                <button class="text-green-600 hover:text-green-900 transition">
                                                                     <!-- Ícono de editar -->
                                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
@@ -172,7 +171,6 @@
         </div>
     </div>
 
-    <!-- Incluir SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Script para manejar la confirmación de eliminación y mostrar detalles -->
@@ -204,10 +202,8 @@
             verDetallesButtons.forEach(button => {
                 button.addEventListener('click', function () {
                     try {
-                        // Asegúrate de que el dataset tenga un JSON válido
                         const consulta = JSON.parse(this.dataset.consulta);
 
-                        // Asegúrate de que totalPagar sea un número antes de usar toFixed
                         const totalPagar = Number(consulta.totalPagar);
 
                         Swal.fire({

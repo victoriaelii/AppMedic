@@ -1,7 +1,21 @@
-<!-- C:\xampp\htdocs\AppMedic\resources\views\layouts\navigationOpciones.blade.php -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+</head>
+<body>
+    
+
 <nav x-data="{ open: false, openCitas: false }" class="bg-white border-b border-gray-100">
     <!-- Menú de Navegación Principal -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="font-poppins max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -12,7 +26,6 @@
                         <img src="{{ asset('images/logoH.png') }}" alt="Logo HealthCenter" class="block h-9 w-auto" />
                     </a>
                     <span class="text-black text-2xl font-bold tracking-normal">Health Center</span> <!-- Texto al lado del logo -->
-
                 </div>
 
                 <!-- Enlaces de Navegación -->
@@ -65,6 +78,13 @@
                                 </x-nav-link>
                             </div>
                         @endif
+
+                        <!-- Enlace a Reportes -->
+                        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <x-nav-link :href="route('reportes')" :active="request()->routeIs('reportes')">
+                                {{ __('Reportes') }}
+                            </x-nav-link>
+                        </div>
                     @elseif(Auth::user()->rol == 'admin')
                         <!-- Enlace a Pacientes -->
                         <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -105,6 +125,13 @@
                         <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                             <x-nav-link :href="route('consultas.porConsultar')" :active="request()->routeIs('consultas.porConsultar')">
                                 {{ __('Consultas') }}
+                            </x-nav-link>
+                        </div>
+
+                        <!-- Enlace a Reportes -->
+                        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <x-nav-link :href="route('reportes')" :active="request()->routeIs('reportes')">
+                                {{ __('Reportes') }}
                             </x-nav-link>
                         </div>
                     @endif
@@ -149,10 +176,6 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <!-- Enlace al Perfil -->
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
 
                         <!-- Autenticación -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -168,8 +191,6 @@
                 </x-dropdown>
                 @endauth
             </div>
-
-
 
             <!-- Botón de Menú para Móviles -->
             <div class="-me-2 flex items-center sm:hidden">
@@ -227,6 +248,13 @@
                         {{ __('Consultas') }}
                     </x-responsive-nav-link>
                 </div>
+
+                <!-- Enlace a Reportes (versión responsiva) -->
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('reportes')" :active="request()->routeIs('reportes')">
+                        {{ __('Reportes') }}
+                    </x-responsive-nav-link>
+                </div>
             @elseif(Auth::user()->rol == 'admin')
                 <!-- Enlace a Pacientes (versión responsiva) -->
                 <div class="pt-2 pb-3 space-y-1">
@@ -269,6 +297,13 @@
                         {{ __('Consultas') }}
                     </x-responsive-nav-link>
                 </div>
+
+                <!-- Enlace a Reportes (versión responsiva) -->
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('reportes')" :active="request()->routeIs('reportes')">
+                        {{ __('Reportes') }}
+                    </x-responsive-nav-link>
+                </div>
             @elseif(Auth::user()->rol == 'secretaria')
                 <!-- Enlace a Pacientes (versión responsiva) -->
                 <div class="pt-2 pb-3 space-y-1">
@@ -298,6 +333,13 @@
                 <div class="pt-2 pb-3 space-y-1">
                     <x-responsive-nav-link :href="route('productos')" :active="request()->routeIs('productos')">
                         {{ __('Productos') }}
+                    </x-responsive-nav-link>
+                </div>
+
+                <!-- Enlace a Reportes (versión responsiva) -->
+                <div class="pt-2 pb-3 space-y-1">
+                    <x-responsive-nav-link :href="route('reportes')" :active="request()->routeIs('reportes')">
+                        {{ __('Reportes') }}
                     </x-responsive-nav-link>
                 </div>
             @endif
@@ -330,3 +372,5 @@
         @endauth
     </div>
 </nav>
+</body>
+</html>

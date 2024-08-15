@@ -4,14 +4,22 @@
             <div class="bg-white shadow-lg rounded-lg overflow-hidden" style="background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);">
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">
-                        <div class="flex items-center justify-between mb-6">
+                        <div class="flex justify-between items-center mb-6">
                             <h1 class="text-2xl font-semibold text-gray-800 uppercase">Pacientes</h1>
+                            <div class="flex items-center space-x-2 bg-blue-100 text-blue-600 px-4 py-2 rounded-full shadow-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                </svg>
+                                <span class="text-lg font-medium">Total de pacientes activos: {{ $totalPacientesActivos }}</span>
+                            </div>
                             <a href="{{ route('agregarPaciente', ['redirect_to' => 'dashboardOpciones']) }}">
                                 <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
                                     {{ __('Registrar Paciente') }}
                                 </button>
                             </a>
                         </div>
+                        
+                        
                         <form method="GET" action="{{ route('dashboardOpciones') }}" class="flex mb-6 space-x-4">
                             <input type="text" name="nombre" placeholder="Nombre del Paciente" class="border border-gray-300 p-3 rounded-md" value="{{ request('nombre') }}">
                             <input type="date" name="fechanac" class="border border-gray-300 p-3 rounded-md" value="{{ request('fechanac') }}">
@@ -19,6 +27,8 @@
                             <button type="submit" class="bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 transition duration-300">Buscar</button>
                             <a href="{{ route('dashboardOpciones') }}" class="bg-gray-500 text-white px-4 py-3 rounded-md hover:bg-gray-600 transition duration-300">Limpiar</a>
                         </form>
+
+                        <!-- Tabla de pacientes -->
                         <table class="min-w-full text-center text-sm bg-white border-collapse" style="background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);">
                             <thead class="bg-gray-50 border-b" style="background-color: rgba(255, 255, 255, 0.7);">
                                 <tr>
@@ -53,7 +63,7 @@
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             <div class="flex items-center justify-center space-x-3">
-                                                <a href="{{ route('pacientes.editar', $paciente->id) }}" class="text-yellow-600 hover:text-yellow-900 transition duration-300">
+                                                <a href="{{ route('pacientes.editar', $paciente->id) }}" class="text-green-600 hover:text-green-900 transition duration-300">
                                                     <!-- Ícono de edición -->
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
@@ -81,9 +91,6 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        
-                                        
-                                        
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -97,7 +104,6 @@
         </div>
     </div>
 
-    <!-- SweetAlert Script -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmDeletion(pacienteId) {

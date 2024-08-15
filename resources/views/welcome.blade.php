@@ -10,6 +10,10 @@
 
     <!-- Estilos -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <style>
         body {
             background-color: #f8fafc;
@@ -52,7 +56,7 @@
     <meta name="keywords" content="HealthCenter, salud, medicina, terapia, psiquiatría, asesoramiento, acupuntura">
     <meta name="author" content="HealthCenter">
 </head>
-<body class="font-sans antialiased">
+<body class="font-poppins antialiased">
     <!-- Header con navegación -->
 
     <!-- Contenedor principal con fondo y superposición -->
@@ -61,7 +65,7 @@
         <div class="absolute inset-0"></div>
         <!-- Contenido principal -->
         <div class="relative z-10 flex flex-col items-center justify-center h-full text-white text-center">
-            <h1 class="text-5xl font-bold mb-4">HealthCenter</h1>
+            <h1 class="text-5xl font-bold mb-4">Health Center</h1>
             <p class="text-lg mb-8">Cuidando de tu salud con profesionalismo y dedicación</p>
             <!-- Iconos debajo del eslogan -->
             <div class="flex space-x-8">

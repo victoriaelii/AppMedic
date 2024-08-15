@@ -314,11 +314,9 @@
     let currentDate = new Date();
     const citas = @json($citas);
 
-    // Initialize the calendar
     updateCalendar();
 </script>
 
-<!-- Añadir estilos personalizados para SweetAlert -->
 <style>
     .swal-wide {
         width: 600px !important;

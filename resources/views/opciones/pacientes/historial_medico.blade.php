@@ -21,6 +21,10 @@
                             @if($cita->consulta && $cita->consulta->estado == 'finalizada')
                                 <div class="p-4 bg-white shadow rounded-md">
                                     <h2 class="text-xl font-bold">Fecha: {{ $cita->fecha }}</h2>
+                                    <p><strong>Médico:</strong> {{ $cita->consulta->medico->nombres }} {{ $cita->consulta->medico->apepat }} {{ $cita->consulta->medico->apemat }}</p>
+                                    @if($cita->consulta->enfermera)
+                                        <p><strong>Enfermera:</strong> {{ $cita->consulta->enfermera->nombres }} {{ $cita->consulta->enfermera->apepat }}</p>
+                                    @endif
                                     <p><strong>Diagnóstico:</strong> {{ $cita->consulta->diagnostico }}</p>
                                     <p><strong>Receta:</strong> {{ $cita->consulta->recete }}</p>
                                     <p><strong>Signos Vitales:</strong> {{ $cita->consulta->signos_vitales }}</p>

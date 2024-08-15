@@ -49,6 +49,10 @@
         @if($cita->consulta && $cita->consulta->estado == 'finalizada')
             <div class="historial-item">
                 <h2>Fecha: {{ $cita->fecha }}</h2>
+                <p><strong>Médico:</strong> {{ optional($cita->consulta->medico)->nombres }} {{ optional($cita->consulta->medico)->apepat }} {{ optional($cita->consulta->medico)->apemat }}</p>
+                @if($cita->consulta->enfermera)
+                    <p><strong>Enfermera:</strong> {{ $cita->consulta->enfermera->nombres }} {{ $cita->consulta->enfermera->apepat }}</p>
+                @endif
                 <p><strong>Diagnóstico:</strong> {{ $cita->consulta->diagnostico }}</p>
                 <p><strong>Receta:</strong> {{ $cita->consulta->recete }}</p>
                 <p><strong>Signos Vitales:</strong> {{ $cita->consulta->signos_vitales }}</p>

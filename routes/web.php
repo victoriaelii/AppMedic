@@ -84,6 +84,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/consultas/terminar/{id}', [SecretariaController::class, 'terminarConsulta'])->name('consultas.terminar');
     Route::post('/consultas/eliminar/{id}', [SecretariaController::class, 'eliminarConsulta'])->name('consultas.eliminarConsulta');
 
+    // Ruta para mostrar la vista de reportes
+    Route::get('/opciones/reportes', [SecretariaController::class, 'mostrarReportes'])->name('reportes');
+
+    // Ruta para generar el reporte con fecha o mes específico
+    Route::post('/opciones/reportes/generar', [SecretariaController::class, 'generarReporte'])->name('reportes.generar');
+
+    Route::get('/opciones/reportes/descargar-dia', [SecretariaController::class, 'descargarReporteDelDiaPdf'])->name('reportes.descargarDiaPdf');
+    Route::post('/opciones/reportes/descargar-mensual', [SecretariaController::class, 'descargarReporteMensualPdf'])->name('reportes.descargarMensualPdf');
+    
 
 
 });
